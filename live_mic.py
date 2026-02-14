@@ -64,22 +64,28 @@ def speak(text):
 # Helper: STT (Scribe v2)
 # -----------------------
 def speech_to_text(audio_np, samplerate):
-    url = "https://api.elevenlabs.io/v1/speech-to-text"
-    files = {
-        "file": ("audio.wav", sf.write("temp.wav", audio_np, samplerate), "audio/wav")
-    }
-    # Actually simplest: write temp file
+    # Save audio temporarily
     wav_file = "temp.wav"
     sf.write(wav_file, audio_np, samplerate)
 
+    url = "https://api.elevenlabs.io/v1/speech-to-text"
+
     headers = {"xi-api-key": API_KEY}
-    with open(wav_file, "rb") as f:
-        r = requests.post(url, headers=headers, files={"file": f})
+    # Include required model_id
+    files = {
+        "file": ("temp.wav", open(wav_file, "rb"), "audio/wav")
+    }
+    data = {
+        "model_id": "eleven_speech_to_text_v2"  # REQUIRED
+    }
+
+    r = requests.post(url, headers=headers, files=files, data=data)
     if r.status_code != 200:
         print("STT failed:", r.text)
         return ""
     result = r.json()
     return result.get("text", "")
+
 
 # -----------------------
 # Helper: send text to agent
