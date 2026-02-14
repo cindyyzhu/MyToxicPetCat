@@ -63,8 +63,10 @@ payload = {
             "first_message": "Hello there!",
             "language": "en"
         }
-    }
+    },
+    "new_turns_limit": 1
 }
+
 
 print("\nRunning conversation simulation...\n")
 
