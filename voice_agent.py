@@ -22,11 +22,11 @@ with sr.AudioFile("input.wav") as source:
 audio = r.record(source)
 
 try:
-text = r.recognize_google(audio)
-print("You said:", text)
+    text = r.recognize_google(audio)
+    print("You said:", text)
 except:
-text = "Hello"
-print("Could not understand audio")
+    text = "Hello"
+    print("Could not understand audio")
 
 # ---------- simple agent reply ----------
 
