@@ -83,10 +83,10 @@ def speak(text, mood="meow"):
         print("TTS failed:", r.text)
         return
     data, sr = sf.read(BytesIO(r.content), dtype="float32")
-    # Play TTS first
-    play_audio(data, sr)
     # Play corresponding cat sound
     play_cat_sound(mood)
+    # Play TTS first
+    play_audio(data, sr)
 
 # ---------------------------- GET AGENT REPLY ----------------------------
 def agent_reply(user_text):
