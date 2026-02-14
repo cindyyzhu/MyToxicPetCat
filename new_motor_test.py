@@ -38,7 +38,6 @@ def right_turn(sec):
     gpio.output(24, True)
     time.sleep(sec)
     gpio.cleanup()
-print("code is running")
 
 seconds = 3
 time.sleep(seconds)
