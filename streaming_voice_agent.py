@@ -10,7 +10,7 @@ API_KEY = os.getenv("ELEVENLABS_API_KEY")
 if not API_KEY:
     raise ValueError("Set ELEVENLABS_API_KEY")
 
-AGENT_ID = "YOUR_AGENT_ID"
+AGENT_ID = "5301khev8757e4qskqcpqhq6em2e"
 VOICE_ID = "EXAVITQu4vr4xnSDxMaL"   # replace if desired
 
 # -------------------------
