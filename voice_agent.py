@@ -1,49 +1,71 @@
-import os
-import sounddevice as sd
+import serial
+import time
+import numpy as np
 import soundfile as sf
-import speech_recognition as sr
-from dotenv import load_dotenv
-from elevenlabs.client import ElevenLabs
+from elevenlabs import generate, play, set_api_key
 
-load_dotenv()
-client = ElevenLabs()
+# ----------------------------
+# Set up ElevenLabs API
+# ----------------------------
+set_api_key("YOUR_ELEVENLABS_API_KEY")  # Replace with your ElevenLabs API key
 
-# ---------- record ----------
+# ----------------------------
+# Serial setup for Arduino
+# ----------------------------
+arduino_port = "/dev/ttyACM0"  # Change if needed
+baud_rate = 115200
+
+ser = serial.Serial(arduino_port, baud_rate, timeout=1)
+time.sleep(2)  # wait for Arduino to reset
+
+# ----------------------------
+# Recording configuration
+# ----------------------------
+sample_rate = 16000      # target sample rate for ElevenLabs
+record_seconds = 4       # how many seconds to record
 
 print("Speak now...")
-audio_data = sd.rec(int(4 * 16000), samplerate=16000, channels=1)
-sd.wait()
-sf.write("input.wav", audio_data, 16000)
 
-# ---------- speech to text ----------
+samples = []
 
-r = sr.Recognizer()
-with sr.AudioFile("input.wav") as source:
-    audio = r.record(source)
+# Read samples from Arduino
+start_time = time.time()
+while (time.time() - start_time) < record_seconds:
+    line = ser.readline().decode("utf-8", errors="ignore").strip()
+    if line:
+        try:
+            mic_val = int(line)
+            # Normalize to float32 between -1.0 and 1.0
+            mic_float = (mic_val / 1023.0) * 2 - 1
+            samples.append(mic_float)
+        except ValueError:
+            pass  # skip invalid lines
 
-try:
-    text = r.recognize_google(audio)
-    print("You said:", text)
-except:
-    text = "Hello"
-    print("Could not understand audio")
+ser.close()
 
-# ---------- simple agent reply ----------
+if not samples:
+    print("No audio captured!")
+    exit()
 
-reply = f"You said {text}. I am your Raspberry Pi voice agent."
+# Convert to numpy array
+audio_np = np.array(samples, dtype=np.float32)
 
-# ---------- elevenlabs TTS ----------
+# Save to temporary WAV
+wav_file = "arduino_record.wav"
+sf.write(wav_file, audio_np, sample_rate)
 
-audio_stream = client.text_to_speech.convert(
-voice_id="Rachel",
-model_id="eleven_multilingual_v2",
-text=reply
+print("Audio captured! Sending to ElevenLabs...")
+
+# ----------------------------
+# Generate speech via ElevenLabs
+# ----------------------------
+text_to_speak = "Hello! This is your Arduino microphone speaking."
+
+audio = generate(
+    text=text_to_speak,
+    voice="Bella",  # change voice as desired
+    model="eleven_monolingual_v1"
 )
 
-with open("reply.mp3", "wb") as f:
-    for chunk in audio_stream:
-        f.write(chunk)
-
-# ---------- play ----------
-
-os.system("ffplay -autoexit -loglevel quiet reply.mp3")
+# Play the generated speech
+play(audio)
