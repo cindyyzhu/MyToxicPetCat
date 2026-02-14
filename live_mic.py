@@ -64,6 +64,9 @@ def speak(text):
 # Helper: STT (Scribe v2)
 # -----------------------
 def speech_to_text(audio_np, samplerate):
+    import soundfile as sf
+    import requests
+
     # Save audio temporarily
     wav_file = "temp.wav"
     sf.write(wav_file, audio_np, samplerate)
@@ -71,12 +74,11 @@ def speech_to_text(audio_np, samplerate):
     url = "https://api.elevenlabs.io/v1/speech-to-text"
 
     headers = {"xi-api-key": API_KEY}
-    # Include required model_id
     files = {
         "file": ("temp.wav", open(wav_file, "rb"), "audio/wav")
     }
     data = {
-        "model_id": "eleven_speech_to_text_v2"  # REQUIRED
+        "model_id": "scribe_v2"  # correct model
     }
 
     r = requests.post(url, headers=headers, files=files, data=data)
