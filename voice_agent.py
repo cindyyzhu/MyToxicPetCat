@@ -15,6 +15,8 @@ if not api_key:
 eleven = ElevenLabs(api_key=api_key)
 voice_name = "Bella"  # change as desired
 
+
+
 # ----------------------------
 # Audio recording configuration
 # ----------------------------
@@ -59,7 +61,9 @@ print(f"Audio recorded and saved as {wav_file}")
 # Generate speech via ElevenLabs
 # ----------------------------
 text_to_speak = "Hello! This is your USB microphone speaking."
-audio_bytes = eleven.text_to_speech(
+
+# Correct way to generate speech
+audio_bytes = eleven.generate(
     text=text_to_speak,
     voice=voice_name,
     model="eleven_monolingual_v1"
