@@ -1,114 +1,103 @@
 import os
+import json
+import requests
 import numpy as np
 import sounddevice as sd
 import soundfile as sf
 import resampy
-from elevenlabs import ElevenLabs
 
 # ----------------------------
-# Load ElevenLabs API key
+# CONFIG
 # ----------------------------
-api_key = os.getenv("ELEVENLABS_API_KEY")
-if not api_key:
-    raise ValueError("Please set the ELEVENLABS_API_KEY environment variable!")
+API_KEY = os.getenv("ELEVENLABS_API_KEY")
+if not API_KEY:
+    raise ValueError("Set ELEVENLABS_API_KEY first")
 
-eleven = ElevenLabs(api_key=api_key)
-voice_name = "Bella"  # change as desired
+RECORD_SECONDS = 4
+TARGET_SR = 16000
 
-# ----------------------------
-# Audio recording configuration
-# ----------------------------
-record_seconds = 4
-target_sample_rate = 16000  # for ElevenLabs
+# 🔹 put your real voice_id here (NOT name)
+VOICE_ID = "EXAVITQu4vr4xnSDxMaL"   # default demo voice
+MODEL_ID = "eleven_monolingual_v1"
 
 # ----------------------------
-# Auto-detect device with both input & output
+# AUTO DEVICE DETECT
 # ----------------------------
 devices = sd.query_devices()
-selected_device = None
-for idx, dev in enumerate(devices):
-    if dev['max_input_channels'] > 0 and dev['max_output_channels'] > 0:
-        selected_device = idx
+device_index = None
+
+for i, d in enumerate(devices):
+    if d["max_input_channels"] > 0 and d["max_output_channels"] > 0:
+        device_index = i
         break
 
-if selected_device is None:
-    raise RuntimeError("No audio device found with both input and output channels!")
+if device_index is None:
+    raise RuntimeError("No full-duplex device found")
 
-device_info = devices[selected_device]
-mic_sample_rate = int(device_info['default_samplerate'])
-out_channels = min(2, device_info['max_output_channels'])  # playback in stereo if possible
+sd.default.device = (device_index, device_index)
+info = sd.query_devices(device_index)
 
-print(f"Using device: {device_info['name']} (index {selected_device})")
-print(f"Mic sample rate: {mic_sample_rate} Hz, Playback channels: {out_channels}")
+mic_sr = int(info["default_samplerate"])
+print("Using device:", info["name"])
+print("Mic SR:", mic_sr)
 
 # ----------------------------
-# Record audio
+# RECORD
 # ----------------------------
 print("Speak now...")
-audio_np = sd.rec(int(record_seconds * mic_sample_rate),
-                  samplerate=mic_sample_rate,
-                  channels=1,
-                  dtype='float32',
-                  device=selected_device)
+audio = sd.rec(int(RECORD_SECONDS * mic_sr),
+               samplerate=mic_sr,
+               channels=1,
+               dtype="float32")
 sd.wait()
-audio_np = audio_np.flatten()
-print("Recording finished!")
+audio = audio.flatten()
+
+# resample if needed
+if mic_sr != TARGET_SR:
+    audio = resampy.resample(audio, mic_sr, TARGET_SR)
+
+sf.write("mic.wav", audio, TARGET_SR)
+print("Saved mic.wav")
 
 # ----------------------------
-# Resample to 16 kHz if needed
+# ELEVENLABS TTS (DOC METHOD)
 # ----------------------------
-if mic_sample_rate != target_sample_rate:
-    audio_resampled = resampy.resample(audio_np, mic_sample_rate, target_sample_rate)
-else:
-    audio_resampled = audio_np
+text = "Hello Cindy, your voice agent is working."
 
-# Save recorded audio
-wav_file = "usb_mic_record.wav"
-sf.write(wav_file, audio_resampled, target_sample_rate)
-print(f"Audio recorded and saved as {wav_file}")
+url = f"https://api.elevenlabs.io/v1/text-to-speech/{VOICE_ID}"
 
-# ----------------------------
-# Generate speech via ElevenLabs
-# ----------------------------
-text_to_speak = "Hello! This is your USB microphone speaking."
+headers = {
+    "xi-api-key": API_KEY,
+    "Content-Type": "application/json"
+}
 
-# ----------------------------
-# Generate speech via ElevenLabs
-# ----------------------------
-# Use the text_to_speech.convert method
-# ----------------------------
-# Generate speech via ElevenLabs (collect generator)
-# ----------------------------
-print("Requesting TTS from ElevenLabs...")
-audio_stream = eleven.text_to_speech.convert(
-    text="Hello! This is your USB microphone speaking.",
-    voice_id=voice_name,
-    model_id="eleven_monolingual_v1",
-    output_format="wav_16000"
-)
+payload = {
+    "text": text,
+    "model_id": MODEL_ID,
+    "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.8
+    }
+}
 
-# Read all chunks into bytes
-audio_bytes = b""
-for chunk in audio_stream:
-    if chunk:
-        audio_bytes += chunk
+print("Requesting ElevenLabs TTS...")
 
+r = requests.post(url, headers=headers, json=payload)
 
-output_file = "output.wav"
-with open(output_file, "wb") as f:
-    f.write(audio_bytes)
-print(f"Speech generated! Saved as {output_file}")
+if r.status_code != 200:
+    print(r.text)
+    raise RuntimeError("TTS request failed")
 
+with open("tts.wav", "wb") as f:
+    f.write(r.content)
+
+print("Saved tts.wav")
 
 # ----------------------------
-# Playback generated speech
+# PLAYBACK
 # ----------------------------
-data, sr = sf.read(output_file, dtype='float32')
+data, sr = sf.read("tts.wav", dtype="float32")
+sd.play(data, sr)
+sd.wait()
 
-# Convert mono to stereo if needed
-if out_channels == 2 and data.ndim == 1:
-    data = np.stack([data, data], axis=-1)
-
-print("Playing back generated speech...")
-sd.play(data, sr, device=selected_device, blocking=True)
-print("Playback finished!")
+print("Done!")
