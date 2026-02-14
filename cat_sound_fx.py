@@ -145,19 +145,23 @@ try:
             print("Agent did not respond.\n")
             continue
 
-        # Play each segment with interleaved cat sounds
         for segment in reply_segments:
-            print(f"CAT AI: {segment}")
-            speak_text_segment(segment)
-
             # determine mood based on keywords
             lower_seg = segment.lower()
             if any(word in lower_seg for word in ["lazy", "incompetent", "inferior", "stupid"]):
-                play_cat_sound("angry")
+                mood = "angry"
             elif any(word in lower_seg for word in ["ugh", "annoyed", "bother"]):
-                play_cat_sound("annoyed")
+                mood = "annoyed"
             else:
-                play_cat_sound("happy")
+                mood = "happy"
+
+            # play cat sound first
+            play_cat_sound(mood)
+
+            # print and speak the text
+            print(f"CAT AI: {segment}")
+            speak_text_segment(segment)
+
 
 except KeyboardInterrupt:
     print("\nExiting. Bye!")
