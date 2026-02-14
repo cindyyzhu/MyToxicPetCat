@@ -47,11 +47,10 @@ def speak(text):
     sd.play(data, sr)
     sd.wait()
 
-
 # -------------------------
-# STREAM SIMULATION
+# SIMULATE CONVERSATION (stable endpoint)
 # -------------------------
-url = f"https://api.elevenlabs.io/v1/convai/agents/{AGENT_ID}/simulate-conversation/stream"
+url = f"https://api.elevenlabs.io/v1/convai/agents/{AGENT_ID}/simulate-conversation"
 
 headers = {
     "xi-api-key": API_KEY,
@@ -67,41 +66,28 @@ payload = {
     }
 }
 
-print("\nStarting streaming simulation...\n")
+print("\nRunning conversation simulation...\n")
 
-with requests.post(url, headers=headers, json=payload, stream=True) as r:
+r = requests.post(url, headers=headers, json=payload)
 
-    if r.status_code != 200:
-        print(r.text)
-        raise RuntimeError("Stream failed")
+if r.status_code != 200:
+    print(r.text)
+    raise RuntimeError("Simulation failed")
 
-    buffer = ""
+data = r.json()
 
-    for chunk in r.iter_content(chunk_size=None):
-        if not chunk:
-            continue
+turns = data.get("simulated_conversation", [])
 
-        buffer += chunk.decode("utf-8")
+for turn in turns:
+    role = turn.get("role", "agent")
+    text = turn.get("message", "")
 
-        # server-sent-events style lines
-        while "\n" in buffer:
-            line, buffer = buffer.split("\n", 1)
+    if not text:
+        continue
 
-            if not line.strip():
-                continue
+    print(f"{role.upper()}: {text}")
 
-            try:
-                event = json.loads(line)
-            except:
-                continue
-
-            if "message" in event:
-                role = event.get("role", "agent")
-                text = event["message"]
-
-                print(f"{role.upper()}: {text}")
-
-                if role == "agent":
-                    speak(text)
+    if role == "agent":
+        speak(text)
 
 print("\nSimulation finished.")
