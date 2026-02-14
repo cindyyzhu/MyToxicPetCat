@@ -19,7 +19,7 @@ sf.write("input.wav", audio_data, 16000)
 
 r = sr.Recognizer()
 with sr.AudioFile("input.wav") as source:
-audio = r.record(source)
+    audio = r.record(source)
 
 try:
     text = r.recognize_google(audio)
@@ -41,8 +41,8 @@ text=reply
 )
 
 with open("reply.mp3", "wb") as f:
-for chunk in audio_stream:
-f.write(chunk)
+    for chunk in audio_stream:
+        f.write(chunk)
 
 # ---------- play ----------
 
