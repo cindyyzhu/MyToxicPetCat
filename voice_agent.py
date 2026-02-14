@@ -15,34 +15,44 @@ if not api_key:
 eleven = ElevenLabs(api_key=api_key)
 voice_name = "Bella"  # change as desired
 
-
-
 # ----------------------------
 # Audio recording configuration
 # ----------------------------
 record_seconds = 4
 target_sample_rate = 16000  # for ElevenLabs
 
-# List devices
-print("Available audio devices:")
-print(sd.query_devices())
+# ----------------------------
+# Auto-detect device with both input & output
+# ----------------------------
+devices = sd.query_devices()
+selected_device = None
+for idx, dev in enumerate(devices):
+    if dev['max_input_channels'] > 0 and dev['max_output_channels'] > 0:
+        selected_device = idx
+        break
 
-# Use default input device
-input_device = sd.default.device[0]  # default input device
-device_info = sd.query_devices(input_device)
+if selected_device is None:
+    raise RuntimeError("No audio device found with both input and output channels!")
+
+device_info = devices[selected_device]
 mic_sample_rate = int(device_info['default_samplerate'])
-print(f"Using input device: {device_info['name']} (default rate: {mic_sample_rate} Hz)")
+out_channels = min(2, device_info['max_output_channels'])  # playback in stereo if possible
+
+print(f"Using device: {device_info['name']} (index {selected_device})")
+print(f"Mic sample rate: {mic_sample_rate} Hz, Playback channels: {out_channels}")
 
 # ----------------------------
-# Record audio using supported sample rate
+# Record audio
 # ----------------------------
 print("Speak now...")
 audio_np = sd.rec(int(record_seconds * mic_sample_rate),
                   samplerate=mic_sample_rate,
                   channels=1,
-                  dtype='float32')
+                  dtype='float32',
+                  device=selected_device)
 sd.wait()
 audio_np = audio_np.flatten()
+print("Recording finished!")
 
 # ----------------------------
 # Resample to 16 kHz if needed
@@ -62,7 +72,7 @@ print(f"Audio recorded and saved as {wav_file}")
 # ----------------------------
 text_to_speak = "Hello! This is your USB microphone speaking."
 
-# Correct way to generate speech
+# Correct method for current SDK
 audio_bytes = eleven.generate(
     text=text_to_speak,
     voice=voice_name,
@@ -78,6 +88,11 @@ print(f"Speech generated! Saved as {output_file}")
 # Playback generated speech
 # ----------------------------
 data, sr = sf.read(output_file, dtype='float32')
-sd.play(data, sr)
-sd.wait()
+
+# Convert mono to stereo if needed
+if out_channels == 2 and data.ndim == 1:
+    data = np.stack([data, data], axis=-1)
+
+print("Playing back generated speech...")
+sd.play(data, sr, device=selected_device, blocking=True)
 print("Playback finished!")
