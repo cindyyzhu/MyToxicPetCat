@@ -72,11 +72,15 @@ print(f"Audio recorded and saved as {wav_file}")
 # ----------------------------
 text_to_speak = "Hello! This is your USB microphone speaking."
 
-# Correct method for current SDK
-audio_bytes = eleven.generate(
+# ----------------------------
+# Generate speech via ElevenLabs
+# ----------------------------
+# Use the text_to_speech.convert method
+audio_bytes = eleven.text_to_speech.convert(
     text=text_to_speak,
-    voice=voice_name,
-    model="eleven_monolingual_v1"
+    voice_id=voice_name,
+    model_id="eleven_monolingual_v1",
+    output_format="wav_16000"  # request raw WAV at 16 kHz
 )
 
 output_file = "output.wav"
