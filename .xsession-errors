@@ -1,0 +1,143 @@
+Xsession: X session started for cindy at Fri 13 Feb 23:38:50 EST 2026
+dbus-update-activation-environment: setting DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/1000/bus
+xrdb: Can't open display ''
+xhost:  unable to open display ""
+dbus-update-activation-environment: setting USER=cindy
+dbus-update-activation-environment: setting TEXTDOMAIN=pam_chksshpwd
+dbus-update-activation-environment: setting XDG_SESSION_TYPE=wayland
+dbus-update-activation-environment: setting HOME=/home/cindy
+dbus-update-activation-environment: setting DESKTOP_SESSION=rpd-labwc
+dbus-update-activation-environment: setting DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/1000/bus
+dbus-update-activation-environment: setting LOGNAME=cindy
+dbus-update-activation-environment: setting XDG_SESSION_CLASS=user
+dbus-update-activation-environment: setting PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/games:/usr/games
+dbus-update-activation-environment: setting XDG_RUNTIME_DIR=/run/user/1000
+dbus-update-activation-environment: setting LANG=en_GB.UTF-8
+dbus-update-activation-environment: setting XDG_SESSION_DESKTOP=rpd-labwc
+dbus-update-activation-environment: setting XDG_GREETER_DATA_DIR=/var/lib/lightdm/data/cindy
+dbus-update-activation-environment: setting SHELL=/bin/bash
+dbus-update-activation-environment: setting GDMSESSION=rpd-labwc
+dbus-update-activation-environment: setting NO_AT_BRIDGE=1
+dbus-update-activation-environment: setting GPG_AGENT_INFO=/run/user/1000/gnupg/S.gpg-agent:0:1
+dbus-update-activation-environment: setting PWD=/home/cindy
+no profile matched
+pgrep: pattern that searches for process name longer than 15 characters will result in zero matches
+Try `pgrep -f' option to match against the complete command line.
+pgrep: pattern that searches for process name longer than 15 characters will result in zero matches
+Try `pgrep -f' option to match against the complete command line.
+
+(polkit-mate-authentication-agent-1:1631): GLib-CRITICAL **: 23:38:52.886: g_variant_new_string: assertion 'string != NULL' failed
+
+(polkit-mate-authentication-agent-1:1631): polkit-mate-1-WARNING **: 23:38:52.888: Failed to register client: GDBus.Error:org.freedesktop.DBus.Error.ServiceUnknown: The name org.gnome.SessionManager was not provided by any .service files
+
+** (squeekboard:1658): WARNING **: 23:38:53.034: Could not register to session manager: Cannot invoke method; proxy is for the well-known name “org.gnome.SessionManager” without an owner, and proxy was constructed with the G_DBUS_PROXY_FLAGS_DO_NOT_AUTO_START flag
+
+Info: Loaded layout Path: "/usr/share/misc/squeekboard/keyboards/ca.yaml"
+Surprise: Panel has been configured, but no request is pending. Ignoring
+** Message: 23:38:54.310: batt: battery 0 not found
+** Message: 23:38:54.677: up: No network connection - polling...
+Info: Loaded layout Path: "/usr/share/misc/squeekboard/keyboards/ca.yaml"
+Debug: Tried file "/usr/share/misc/squeekboard/keyboards/terminal/ca.yaml", but it's missing: No such file or directory (os error 2)
+Warning: Failed to load layout from Resource: terminal/ca: Missing resource, skipping
+Info: Loaded layout Path: "/usr/share/misc/squeekboard/keyboards/terminal/us.yaml"
+Info: Loaded layout Path: "/usr/share/misc/squeekboard/keyboards/ca.yaml"
+Info: Loaded layout Path: "/usr/share/misc/squeekboard/keyboards/ca.yaml"
+Debug: Tried file "/usr/share/misc/squeekboard/keyboards/terminal/ca.yaml", but it's missing: No such file or directory (os error 2)
+Warning: Failed to load layout from Resource: terminal/ca: Missing resource, skipping
+Info: Loaded layout Path: "/usr/share/misc/squeekboard/keyboards/terminal/us.yaml"
+Info: Loaded layout Path: "/usr/share/misc/squeekboard/keyboards/ca.yaml"
+
+(wf-panel-pi:1655): GLib-CRITICAL **: 23:39:37.350: g_atomic_ref_count_dec: assertion 'old_value > 0' failed
+Info: Loaded layout Path: "/usr/share/misc/squeekboard/keyboards/ca.yaml"
+Debug: Tried file "/usr/share/misc/squeekboard/keyboards/terminal/ca.yaml", but it's missing: No such file or directory (os error 2)
+Warning: Failed to load layout from Resource: terminal/ca: Missing resource, skipping
+Info: Loaded layout Path: "/usr/share/misc/squeekboard/keyboards/terminal/us.yaml"
+Info: Loaded layout Path: "/usr/share/misc/squeekboard/keyboards/ca.yaml"
+
+(wf-panel-pi:1655): GLib-CRITICAL **: 23:39:44.902: g_atomic_ref_count_dec: assertion 'old_value > 0' failed
+Info: Loaded layout Path: "/usr/share/misc/squeekboard/keyboards/ca.yaml"
+Debug: Tried file "/usr/share/misc/squeekboard/keyboards/terminal/ca.yaml", but it's missing: No such file or directory (os error 2)
+Warning: Failed to load layout from Resource: terminal/ca: Missing resource, skipping
+Info: Loaded layout Path: "/usr/share/misc/squeekboard/keyboards/terminal/us.yaml"
+** Message: 23:39:54.659: up: No network connection - polling...
+Info: Loaded layout Path: "/usr/share/misc/squeekboard/keyboards/ca.yaml"
+
+(wf-panel-pi:1655): GLib-CRITICAL **: 23:40:04.893: g_atomic_ref_count_dec: assertion 'old_value > 0' failed
+Info: Loaded layout Path: "/usr/share/misc/squeekboard/keyboards/ca.yaml"
+Debug: Tried file "/usr/share/misc/squeekboard/keyboards/terminal/ca.yaml", but it's missing: No such file or directory (os error 2)
+Warning: Failed to load layout from Resource: terminal/ca: Missing resource, skipping
+Info: Loaded layout Path: "/usr/share/misc/squeekboard/keyboards/terminal/us.yaml"
+Info: Loaded layout Path: "/usr/share/misc/squeekboard/keyboards/ca.yaml"
+
+(wf-panel-pi:1655): GLib-CRITICAL **: 23:40:07.080: g_atomic_ref_count_dec: assertion 'old_value > 0' failed
+Info: Loaded layout Path: "/usr/share/misc/squeekboard/keyboards/ca.yaml"
+Info: Loaded layout Path: "/usr/share/misc/squeekboard/keyboards/ca.yaml"
+
+(wf-panel-pi:1655): GLib-CRITICAL **: 23:40:42.053: g_atomic_ref_count_dec: assertion 'old_value > 0' failed
+Info: Loaded layout Path: "/usr/share/misc/squeekboard/keyboards/ca.yaml"
+
+(wf-panel-pi:1655): GLib-CRITICAL **: 23:40:50.252: g_atomic_ref_count_dec: assertion 'old_value > 0' failed
+Info: Loaded layout Path: "/usr/share/misc/squeekboard/keyboards/ca.yaml"
+** Message: 23:40:54.655: up: No network connection - polling...
+Info: Loaded layout Path: "/usr/share/misc/squeekboard/keyboards/ca.yaml"
+
+(wf-panel-pi:1655): GLib-CRITICAL **: 23:41:30.435: g_atomic_ref_count_dec: assertion 'old_value > 0' failed
+Info: Loaded layout Path: "/usr/share/misc/squeekboard/keyboards/ca.yaml"
+
+(wf-panel-pi:1655): GLib-CRITICAL **: 23:41:31.406: g_atomic_ref_count_dec: assertion 'old_value > 0' failed
+Info: Loaded layout Path: "/usr/share/misc/squeekboard/keyboards/ca.yaml"
+Debug: Tried file "/usr/share/misc/squeekboard/keyboards/terminal/ca.yaml", but it's missing: No such file or directory (os error 2)
+Warning: Failed to load layout from Resource: terminal/ca: Missing resource, skipping
+Info: Loaded layout Path: "/usr/share/misc/squeekboard/keyboards/terminal/us.yaml"
+Info: Loaded layout Path: "/usr/share/misc/squeekboard/keyboards/ca.yaml"
+Info: Loaded layout Path: "/usr/share/misc/squeekboard/keyboards/ca.yaml"
+Debug: Tried file "/usr/share/misc/squeekboard/keyboards/terminal/ca.yaml", but it's missing: No such file or directory (os error 2)
+Warning: Failed to load layout from Resource: terminal/ca: Missing resource, skipping
+Info: Loaded layout Path: "/usr/share/misc/squeekboard/keyboards/terminal/us.yaml"
+Info: Loaded layout Path: "/usr/share/misc/squeekboard/keyboards/ca.yaml"
+
+(wf-panel-pi:1655): GLib-CRITICAL **: 09:18:33.306: g_atomic_ref_count_dec: assertion 'old_value > 0' failed
+** Message: 09:18:43.406: up: Checking for updates
+** Message: 09:18:46.961: up: Cache updated - comparing versions
+** Message: 09:18:54.185: up: Check complete - 138 updates available
+Info: Loaded layout Path: "/usr/share/misc/squeekboard/keyboards/ca.yaml"
+Debug: Tried file "/usr/share/misc/squeekboard/keyboards/terminal/ca.yaml", but it's missing: No such file or directory (os error 2)
+Warning: Failed to load layout from Resource: terminal/ca: Missing resource, skipping
+Info: Loaded layout Path: "/usr/share/misc/squeekboard/keyboards/terminal/us.yaml"
+Info: Loaded layout Path: "/usr/share/misc/squeekboard/keyboards/ca.yaml"
+
+(wf-panel-pi:1655): GLib-CRITICAL **: 09:19:23.473: g_atomic_ref_count_dec: assertion 'old_value > 0' failed
+Info: Loaded layout Path: "/usr/share/misc/squeekboard/keyboards/ca.yaml"
+Debug: Tried file "/usr/share/misc/squeekboard/keyboards/terminal/ca.yaml", but it's missing: No such file or directory (os error 2)
+Warning: Failed to load layout from Resource: terminal/ca: Missing resource, skipping
+Info: Loaded layout Path: "/usr/share/misc/squeekboard/keyboards/terminal/us.yaml"
+Info: Loaded layout Path: "/usr/share/misc/squeekboard/keyboards/ca.yaml"
+Info: Loaded layout Path: "/usr/share/misc/squeekboard/keyboards/ca.yaml"
+Debug: Tried file "/usr/share/misc/squeekboard/keyboards/terminal/ca.yaml", but it's missing: No such file or directory (os error 2)
+Warning: Failed to load layout from Resource: terminal/ca: Missing resource, skipping
+Info: Loaded layout Path: "/usr/share/misc/squeekboard/keyboards/terminal/us.yaml"
+Info: Loaded layout Path: "/usr/share/misc/squeekboard/keyboards/ca.yaml"
+Info: Loaded layout Path: "/usr/share/misc/squeekboard/keyboards/ca.yaml"
+Debug: Tried file "/usr/share/misc/squeekboard/keyboards/terminal/ca.yaml", but it's missing: No such file or directory (os error 2)
+Warning: Failed to load layout from Resource: terminal/ca: Missing resource, skipping
+Info: Loaded layout Path: "/usr/share/misc/squeekboard/keyboards/terminal/us.yaml"
+** Message: 09:21:00.325: No keyring secrets found for LONGAN/802-11-wireless-security; asking user.
+Info: Loaded layout Path: "/usr/share/misc/squeekboard/keyboards/ca.yaml"
+Info: Loaded layout Path: "/usr/share/misc/squeekboard/keyboards/ca.yaml"
+Debug: Tried file "/usr/share/misc/squeekboard/keyboards/terminal/ca.yaml", but it's missing: No such file or directory (os error 2)
+Warning: Failed to load layout from Resource: terminal/ca: Missing resource, skipping
+Info: Loaded layout Path: "/usr/share/misc/squeekboard/keyboards/terminal/us.yaml"
+Info: Loaded layout Path: "/usr/share/misc/squeekboard/keyboards/ca.yaml"
+Info: Loaded layout Path: "/usr/share/misc/squeekboard/keyboards/ca.yaml"
+Debug: Tried file "/usr/share/misc/squeekboard/keyboards/terminal/ca.yaml", but it's missing: No such file or directory (os error 2)
+Warning: Failed to load layout from Resource: terminal/ca: Missing resource, skipping
+Info: Loaded layout Path: "/usr/share/misc/squeekboard/keyboards/terminal/us.yaml"
+Info: Loaded layout Path: "/usr/share/misc/squeekboard/keyboards/ca.yaml"
+Info: Loaded layout Path: "/usr/share/misc/squeekboard/keyboards/ca.yaml"
+Debug: Tried file "/usr/share/misc/squeekboard/keyboards/terminal/ca.yaml", but it's missing: No such file or directory (os error 2)
+Warning: Failed to load layout from Resource: terminal/ca: Missing resource, skipping
+Info: Loaded layout Path: "/usr/share/misc/squeekboard/keyboards/terminal/us.yaml"
+Info: Loaded layout Path: "/usr/share/misc/squeekboard/keyboards/ca.yaml"
+Debug: Tried file "/usr/share/misc/squeekboard/keyboards/terminal/ca.yaml", but it's missing: No such file or directory (os error 2)
+Warning: Failed to load layout from Resource: terminal/ca: Missing resource, skipping
+Info: Loaded layout Path: "/usr/share/misc/squeekboard/keyboards/terminal/us.yaml"
