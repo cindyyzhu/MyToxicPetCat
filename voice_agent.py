@@ -99,6 +99,7 @@ with open(output_file, "wb") as f:
     f.write(audio_bytes)
 print(f"Speech generated! Saved as {output_file}")
 
+
 # ----------------------------
 # Playback generated speech
 # ----------------------------
