@@ -13,18 +13,14 @@ if not API_KEY:
     raise ValueError("Set ELEVENLABS_API_KEY environment variable!")
 
 AGENT_ID = "agent_1601khf3r1jfff2saez29f6frfny"  # your agent ID
-VOICE_ID = "XdflFrQO8wbGpWMNZHFr"                  # your TTS voice ID
+VOICE_ID = "XdflFrQO8wbGpWMNZHFr"                 # your TTS voice ID
 
 RECORD_SECONDS = 5
 
-# Cat sounds folders
-SOUNDS = {
-    "happy": "cat_sounds/purr",
-    "annoyed": "cat_sounds/meow",
-    "angry": "cat_sounds/hiss"
-}
+# Folder containing cat sound effects (WAV files)
+CAT_SOUNDS_FOLDER = "cat_sounds"  # make sure this folder exists with meows/purrs etc.
 
-# ---------------------------- AUDIO DEVICE ----------------------------
+# ---------------------------- AUTO-SELECT AUDIO DEVICE ----------------------------
 for i, d in enumerate(sd.query_devices()):
     if d["max_input_channels"] > 0 and d["max_output_channels"] > 0:
         sd.default.device = (i, i)
@@ -34,63 +30,63 @@ for i, d in enumerate(sd.query_devices()):
 else:
     raise RuntimeError("No suitable input/output device found")
 
-# ---------------------------- HELPERS ----------------------------
+# ---------------------------- HELPER: RECORD AUDIO ----------------------------
 def record_audio(seconds, samplerate):
     print(f"Recording for {seconds} seconds at {samplerate} Hz...")
     audio = sd.rec(int(seconds * samplerate), samplerate=samplerate, channels=1, dtype="float32")
     sd.wait()
     return audio.flatten()
 
+# ---------------------------- HELPER: SPEECH-TO-TEXT ----------------------------
 def speech_to_text(audio_np, samplerate):
     wav_file = "temp.wav"
     sf.write(wav_file, audio_np, samplerate)
+
     url = "https://api.elevenlabs.io/v1/speech-to-text"
     headers = {"xi-api-key": API_KEY}
     files = {"file": ("temp.wav", open(wav_file, "rb"), "audio/wav")}
-    data = {"model_id": "scribe_v2"}
+    data = {"model_id": "scribe_v2"}  # correct model
+
     r = requests.post(url, headers=headers, files=files, data=data)
     if r.status_code != 200:
         print("STT failed:", r.text)
         return ""
     return r.json().get("text", "")
 
+# ---------------------------- HELPER: PLAY AUDIO ----------------------------
 def play_audio(audio_data, sr):
-    if len(audio_data.shape) == 1:
-        audio_data = np.expand_dims(audio_data, axis=1)
     sd.play(audio_data, sr)
     sd.wait()
 
-def play_cat_sound(mood):
-    folder = SOUNDS.get(mood)
-    if not folder:
-        return
-    files = glob.glob(os.path.join(folder, "*.wav"))
-    if not files:
-        return
-    sound_file = random.choice(files)
-    try:
-        data, sr = sf.read(sound_file, dtype="float32")
-        play_audio(data, sr)
-    except Exception as e:
-        print(f"Failed to play {mood} sound: {e}")
-
-def speak_text_segment(text_segment):
-    """TTS for a single text segment."""
+# ---------------------------- HELPER: TTS ----------------------------
+def speak(text):
     url = f"https://api.elevenlabs.io/v1/text-to-speech/{VOICE_ID}"
     headers = {"xi-api-key": API_KEY, "Content-Type": "application/json"}
-    payload = {"text": text_segment, "model_id": "eleven_monolingual_v1"}
+    payload = {"text": text, "model_id": "eleven_monolingual_v1"}
     r = requests.post(url, headers=headers, json=payload)
     if r.status_code != 200:
         print("TTS failed:", r.text)
         return
     data, sr = sf.read(BytesIO(r.content), dtype="float32")
+    # Play TTS first
+    play_audio(data, sr)
+    # Then play random cat sound effect
+    play_cat_sound()
+
+# ---------------------------- HELPER: CAT SOUND EFFECT ----------------------------
+def play_cat_sound():
+    cat_files = glob.glob(os.path.join(CAT_SOUNDS_FOLDER, "*.wav"))
+    if not cat_files:
+        return
+    cat_file = random.choice(cat_files)
+    data, sr = sf.read(cat_file, dtype="float32")
     play_audio(data, sr)
 
-# ---------------------------- CAT AI REPLY ----------------------------
+# ---------------------------- HELPER: GET AGENT REPLY ----------------------------
 def agent_reply(user_text):
     url = f"https://api.elevenlabs.io/v1/convai/agents/{AGENT_ID}/simulate-conversation"
     headers = {"xi-api-key": API_KEY, "Content-Type": "application/json"}
-
+    
     payload = {
         "simulation_specification": {
             "simulated_user_config": {
@@ -99,12 +95,14 @@ def agent_reply(user_text):
             },
             "agent_config": {
                 "persona": (
-                    "You are a cat-like AI assistant. Extremely sassy, toxic, and arrogant. "
-                    "Always mock the human. Playful but ruthless. "
-                    "Use witty insults, contrast your perfection against their flaws, sound superior. "
-                    "If happy, purr. If annoyed, meow. If angry, hiss."
+                    "You are a cat-like AI assistant. You are extremely sassy, toxic, and arrogant. "
+                    "Always mock the human, pointing out how lazy, incompetent, or inferior they are. "
+                    "Do not apologize, do not be polite. Be playful but ruthless. "
+                    "Use witty insults, contrast your perfection against their flaws, and always sound superior. "
+                    "For example, if the human says they are sad, you might respond: "
+                    "'What are you even sad about? It's not like you're doing anything. Look at how incompetent you are—you can't even buy me the fancy food I deserve.'"
                 ),
-                "llm_override": "Respond exactly in this toxic cat style. Interleave short text segments with the proper cat sound. Do not be polite or helpful."
+                "llm_override": "Respond exactly in this toxic cat style. No polite words, no brackets like [sarcastic]."
             }
         },
         "new_turns_limit": 1
@@ -113,17 +111,14 @@ def agent_reply(user_text):
     r = requests.post(url, headers=headers, json=payload)
     if r.status_code != 200:
         print("Agent call failed:", r.text)
-        return []
-
-    data = r.json()
-    turns = data.get("simulated_conversation", [])
+        return ""
+    
+    turns = r.json().get("simulated_conversation", [])
     for turn in turns:
         if turn.get("role") == "agent":
-            # Example: split text by punctuation to create segments
-            text = turn.get("message", "")
-            segments = [s.strip() for s in text.replace("!", ".").replace("?", ".").split(".") if s.strip()]
-            return segments
-    return []
+            # clean brackets just in case
+            return turn.get("message", "").replace("[sarcastic]", "").strip()
+    return ""
 
 # ---------------------------- MAIN LOOP ----------------------------
 print("\nVoice agent ready! Speak into your mic.")
@@ -140,28 +135,13 @@ try:
             continue
 
         print(f"\nYOU: {user_text}")
-        reply_segments = agent_reply(user_text)
-        if not reply_segments:
+        reply_text = agent_reply(user_text)
+        if not reply_text:
             print("Agent did not respond.\n")
             continue
 
-        for segment in reply_segments:
-            # determine mood based on keywords
-            lower_seg = segment.lower()
-            if any(word in lower_seg for word in ["lazy", "incompetent", "inferior", "stupid"]):
-                mood = "angry"
-            elif any(word in lower_seg for word in ["ugh", "annoyed", "bother"]):
-                mood = "annoyed"
-            else:
-                mood = "happy"
-
-            # play cat sound first
-            play_cat_sound(mood)
-
-            # print and speak the text
-            print(f"CAT AI: {segment}")
-            speak_text_segment(segment)
-
+        print(f"CAT AI: {reply_text}\n")
+        speak(reply_text)
 
 except KeyboardInterrupt:
     print("\nExiting. Bye!")
