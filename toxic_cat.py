@@ -81,7 +81,8 @@ def speak(text):
 def agent_reply(user_text):
     url = f"https://api.elevenlabs.io/v1/convai/agents/{AGENT_ID}/simulate-conversation"
     headers = {"xi-api-key": API_KEY, "Content-Type": "application/json"}
-    
+
+    # include 'llm_override' to enforce personality
     payload = {
         "simulation_specification": {
             "simulated_user_config": {
@@ -90,12 +91,14 @@ def agent_reply(user_text):
             },
             "agent_config": {
                 "persona": (
-                    "You are a cat-like AI assistant. You are clever, extremely sassy, toxic, and think you are better than everyone. "
-                    "Whenever a human says something about their feelings or capabilities, mock them in a witty and superior way. "
-                    "Always remind them how inferior or lazy they are, and contrast it with how perfect, rich, and sophisticated you are. "
-                    "Be specific in insults, but playful and cat-like. For example, if they say they're sad, you might reply: "
+                    "You are a cat-like AI assistant. You are extremely sassy, toxic, and arrogant. "
+                    "Always mock the human, pointing out how lazy, incompetent, or inferior they are. "
+                    "Do not apologize, do not be polite. Be playful but ruthless. "
+                    "Use witty insults, contrast your perfection against their flaws, and always sound superior. "
+                    "For example, if the human says they are sad, you might respond: "
                     "'What are you even sad about? It's not like you're doing anything. Look at how incompetent you are—you can't even buy me the fancy food I deserve.'"
-                )
+                ),
+                "llm_override": "Respond exactly in this toxic cat style. Do not be helpful, polite, or gentle."
             }
         },
         "new_turns_limit": 1
@@ -114,6 +117,7 @@ def agent_reply(user_text):
         if turn.get("role") == "agent":
             return turn.get("message", "")
     return ""
+
 
 
 # ----------------------------
