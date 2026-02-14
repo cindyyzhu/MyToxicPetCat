@@ -68,6 +68,7 @@ def speak(text):
         print("TTS failed:", r.text)
         return
     data, sr = sf.read(BytesIO(r.content), dtype="float32")
+    play_cat_sound()
     # Play TTS first
     play_audio(data, sr)
     # Then play random cat sound effect
