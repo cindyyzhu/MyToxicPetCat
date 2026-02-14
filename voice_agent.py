@@ -76,12 +76,23 @@ text_to_speak = "Hello! This is your USB microphone speaking."
 # Generate speech via ElevenLabs
 # ----------------------------
 # Use the text_to_speech.convert method
-audio_bytes = eleven.text_to_speech.convert(
-    text=text_to_speak,
+# ----------------------------
+# Generate speech via ElevenLabs (collect generator)
+# ----------------------------
+print("Requesting TTS from ElevenLabs...")
+audio_stream = eleven.text_to_speech.convert(
+    text="Hello! This is your USB microphone speaking.",
     voice_id=voice_name,
     model_id="eleven_monolingual_v1",
-    output_format="wav_16000"  # request raw WAV at 16 kHz
+    output_format="wav_16000"
 )
+
+# Read all chunks into bytes
+audio_bytes = b""
+for chunk in audio_stream:
+    if chunk:
+        audio_bytes += chunk
+
 
 output_file = "output.wav"
 with open(output_file, "wb") as f:
