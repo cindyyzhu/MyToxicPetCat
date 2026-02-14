@@ -51,7 +51,7 @@ def speak(text):
 # -------------------------
 # STREAM SIMULATION
 # -------------------------
-url = f"https://api.elevenlabs.io/v1/convai/agents/{AGENT_ID}/stream-simulate-conversation"
+url = f"https://api.elevenlabs.io/v1/convai/agents/{AGENT_ID}/simulate-conversation/stream"
 
 headers = {
     "xi-api-key": API_KEY,
