@@ -6,5 +6,5 @@ api_key = os.getenv("ELEVENLABS_API_KEY")
 if not api_key:
     raise ValueError("Set ELEVENLABS_API_KEY environment variable!")
 
-client = ElevenLabs(api_key)
+client = ElevenLabs()
 print("ElevenLabs client initialized successfully!")
