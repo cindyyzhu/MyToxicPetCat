@@ -12,8 +12,8 @@ API_KEY = os.getenv("ELEVENLABS_API_KEY")
 if not API_KEY:
     raise ValueError("Set ELEVENLABS_API_KEY environment variable!")
 
-AGENT_ID = "agent_5301khev8757e4qskqcpqhq6em2e"  # your agent ID
-VOICE_ID = "EXAVITQu4vr4xnSDxMaL"                  # your TTS voice ID
+AGENT_ID = "agent_1601khf3r1jfff2saez29f6frfny"  # your agent ID
+VOICE_ID = "XdflFrQO8wbGpWMNZHFr"                  # your TTS voice ID
 
 RECORD_SECONDS = 5
 
