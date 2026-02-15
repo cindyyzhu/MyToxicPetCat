@@ -29,7 +29,7 @@ EMOTIONS = {
 }
 
 # ====================== AUDIO DEVICE SETUP =======================
-sd.default.device = None
+sd.default.device = sd.query_devices(kind="output")["index"]
 DEFAULT_SR = int(sd.query_devices(kind="output")["default_samplerate"])
 
 # ====================== GPIO / MOTOR SETUP =======================
@@ -55,16 +55,27 @@ def record_audio(seconds):
     return audio.flatten()
 
 def play_audio(audio, sr):
+    # force mono
+    if audio.ndim > 1:
+        audio = np.mean(audio, axis=1)
+
+    # resample if needed
     if sr != DEFAULT_SR:
         audio = np.interp(
             np.linspace(0, len(audio), int(len(audio) * DEFAULT_SR / sr)),
             np.arange(len(audio)),
             audio
         )
+
     audio = audio.astype(np.float32)
-    audio /= max(np.max(np.abs(audio)), 1e-6)
-    sd.play(audio, DEFAULT_SR)
-    sd.wait()
+
+    # 🔥 SAFE normalization (never zero out audio)
+    peak = np.max(np.abs(audio))
+    if peak > 0:
+        audio = audio / peak * 0.8
+
+    sd.play(audio, DEFAULT_SR, blocking=True)
+
 
 # ============================ SPEECH =============================
 
@@ -166,11 +177,8 @@ def perform_motion(emotion):
 
 def speak(text):
     emotion = determine_emotion(text)
-    play_cat_sound(emotion)
 
-    threading.Thread(
-        target=perform_motion, args=(emotion,), daemon=True
-    ).start()
+    play_cat_sound(emotion)
 
     r = requests.post(
         f"https://api.elevenlabs.io/v1/text-to-speech/{VOICE_ID}",
@@ -183,7 +191,13 @@ def speak(text):
     )
 
     data, sr = sf.read(BytesIO(r.content), dtype="float32")
-    play_audio(data, sr)
+    play_audio(data, sr)   # 🔊 AUDIO FIRST
+
+    # ⚙️ motors after audio starts
+    threading.Thread(
+        target=perform_motion, args=(emotion,), daemon=True
+    ).start()
+
 
 # ============================ MAIN ===============================
 
