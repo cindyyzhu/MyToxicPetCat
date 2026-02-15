@@ -30,6 +30,38 @@ for i, d in enumerate(sd.query_devices()):
 else:
     raise RuntimeError("No suitable input/output device found")
 
+def resample_audio(audio, orig_sr, target_sr):
+    if orig_sr == target_sr:
+        return audio.astype(np.float32)
+
+    duration = len(audio) / orig_sr
+    new_length = int(duration * target_sr)
+
+    # mono
+    if audio.ndim == 1:
+        resampled = np.interp(
+            np.linspace(0, len(audio)-1, new_length),
+            np.arange(len(audio)),
+            audio
+        )
+
+    # stereo or multi-channel
+    else:
+        channels = []
+        for ch in range(audio.shape[1]):
+            channels.append(
+                np.interp(
+                    np.linspace(0, len(audio)-1, new_length),
+                    np.arange(len(audio)),
+                    audio[:, ch]
+                )
+            )
+        resampled = np.stack(channels, axis=1)
+
+    return resampled.astype(np.float32)
+
+
+
 # ---------------------------- HELPER: RECORD AUDIO ----------------------------
 def record_audio(seconds, samplerate):
     print(f"Recording for {seconds} seconds at {samplerate} Hz...")
@@ -55,8 +87,18 @@ def speech_to_text(audio_np, samplerate):
 
 # ---------------------------- HELPER: PLAY AUDIO ----------------------------
 def play_audio(audio_data, sr):
-    sd.play(audio_data, sr)
+    audio_data = resample_audio(audio_data, sr, DEFAULT_SR)
+
+    # ensure float32 (PortAudio prefers this)
+    audio_data = audio_data.astype(np.float32)
+
+    audio_data = audio_data / np.max(np.abs(audio_data))
+
+
+    sd.play(audio_data, DEFAULT_SR)
     sd.wait()
+
+
 
 # ---------------------------- HELPER: TTS ----------------------------
 def speak(text):
