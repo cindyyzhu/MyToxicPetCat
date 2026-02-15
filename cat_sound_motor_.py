@@ -194,22 +194,15 @@ def play_cat_sound_and_move_motor(data, sr):
 
             elif amp > 0.5:
                 motorA_forward(speed=speed)
+                motorB_backward(speed=speed)
 
             elif amp > 0.3:
+                motorA_backward(speed=speed)
                 motorB_forward(speed=speed)
             
             elif amp >0.2:
                 motorA_forward(speed=int(speed * 0.8)) 
                 motorB_forward(speed=speed)
-
-            if amp >= 0.2 and amp <= 0.5:
-                motorA_forward(speed=speed) 
-                motorB_forward(speed=int(speed * 0.6))
-
-            if amp > 0.6:  # If the audio is very loud, add some random jitter for expressiveness
-                if random.random() < 0.3:  # 30% chance to add jitter on any given frame
-                    motorA_forward(speed=int(speed * random.uniform(0.8, 1.2)))
-                    motorB_forward(speed=int(speed * random.uniform(0.8, 1.2)))
         else:
             # If the audio is quiet, stop moving
             stop_motors()
