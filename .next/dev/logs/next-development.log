@@ -1,0 +1,326 @@
+[00:00:00.574] Server  LOG     ✓ Ready in 362ms
+[00:00:03.066] Server  ERROR   ⨯ ./components/CatTTS.js:5:1
+Export ElevenLabsProvider doesn't exist in target module
+  3 |
+  4 | import { useState } from "react";
+> 5 | import { ElevenLabsProvider, useElevenLabs } from "@elevenlabs/react";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  6 |
+  7 | export default function CatTTS() {
+  8 |   const [text, setText] = useState("");
+
+The export ElevenLabsProvider was not found in module [project]/node_modules/@elevenlabs/react/dist/lib.modern.js [app-client] (ecmascript).
+Did you mean to import useConversation?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./components/CatTTS.js [Client Component Browser]
+    ./app/page.js [Client Component Browser]
+    ./app/page.js [Server Component]
+
+  Client Component SSR:
+    ./components/CatTTS.js [Client Component SSR]
+    ./app/page.js [Client Component SSR]
+    ./app/page.js [Server Component]
+
+
+
+./components/CatTTS.js:5:1
+Export ElevenLabsProvider doesn't exist in target module
+  3 |
+  4 | import { useState } from "react";
+> 5 | import { ElevenLabsProvider, useElevenLabs } from "@elevenlabs/react";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  6 |
+  7 | export default function CatTTS() {
+  8 |   const [text, setText] = useState("");
+
+The export ElevenLabsProvider was not found in module [project]/node_modules/@elevenlabs/react/dist/lib.modern.js [app-ssr] (ecmascript).
+Did you mean to import useConversation?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./components/CatTTS.js [Client Component Browser]
+    ./app/page.js [Client Component Browser]
+    ./app/page.js [Server Component]
+
+  Client Component SSR:
+    ./components/CatTTS.js [Client Component SSR]
+    ./app/page.js [Client Component SSR]
+    ./app/page.js [Server Component]
+
+
+
+./components/CatTTS.js:5:1
+Export useElevenLabs doesn't exist in target module
+  3 |
+  4 | import { useState } from "react";
+> 5 | import { ElevenLabsProvider, useElevenLabs } from "@elevenlabs/react";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  6 |
+  7 | export default function CatTTS() {
+  8 |   const [text, setText] = useState("");
+
+The export useElevenLabs was not found in module [project]/node_modules/@elevenlabs/react/dist/lib.modern.js [app-client] (ecmascript).
+Did you mean to import RealtimeEvents?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./components/CatTTS.js [Client Component Browser]
+    ./app/page.js [Client Component Browser]
+    ./app/page.js [Server Component]
+
+  Client Component SSR:
+    ./components/CatTTS.js [Client Component SSR]
+    ./app/page.js [Client Component SSR]
+    ./app/page.js [Server Component]
+
+
+
+./components/CatTTS.js:5:1
+Export useElevenLabs doesn't exist in target module
+  3 |
+  4 | import { useState } from "react";
+> 5 | import { ElevenLabsProvider, useElevenLabs } from "@elevenlabs/react";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  6 |
+  7 | export default function CatTTS() {
+  8 |   const [text, setText] = useState("");
+
+The export useElevenLabs was not found in module [project]/node_modules/@elevenlabs/react/dist/lib.modern.js [app-ssr] (ecmascript).
+Did you mean to import RealtimeEvents?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./components/CatTTS.js [Client Component Browser]
+    ./app/page.js [Client Component Browser]
+    ./app/page.js [Server Component]
+
+  Client Component SSR:
+    ./components/CatTTS.js [Client Component SSR]
+    ./app/page.js [Client Component SSR]
+    ./app/page.js [Server Component]
+
+
+[00:00:04.859] Browser ERROR   uncaughtError: Error: ./components/CatTTS.js:5:1
+Export ElevenLabsProvider doesn't exist in target module
+  3 |
+  4 | import { useState } from "react";
+> 5 | import { ElevenLabsProvider, useElevenLabs } from "@elevenlabs/react";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  6 |
+  7 | export default function CatTTS() {
+  8 |   const [text, setText] = useState("");
+
+The export ElevenLabsProvider was not found in module [project]/node_modules/@elevenlabs/react/dist/lib.modern.js [app-client] (ecmascript).
+Did you mean to import useConversation?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./components/CatTTS.js [Client Component Browser]
+    ./app/page.js [Client Component Browser]
+    ./app/page.js [Server Component]
+
+  Client Component SSR:
+    ./components/CatTTS.js [Client Component SSR]
+    ./app/page.js [Client Component SSR]
+    ./app/page.js [Server Component]
+
+
+[00:00:05.392] Browser ERROR   ./components/CatTTS.js:5:1
+Export ElevenLabsProvider doesn't exist in target module
+  3 |
+  4 | import { useState } from "react";
+> 5 | import { ElevenLabsProvider, useElevenLabs } from "@elevenlabs/react";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  6 |
+  7 | export default function CatTTS() {
+  8 |   const [text, setText] = useState("");
+
+The export ElevenLabsProvider was not found in module [project]/node_modules/@elevenlabs/react/dist/lib.modern.js [app-client] (ecmascript).
+Did you mean to import useConversation?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./components/CatTTS.js [Client Component Browser]
+    ./app/page.js [Client Component Browser]
+    ./app/page.js [Server Component]
+
+  Client Component SSR:
+    ./components/CatTTS.js [Client Component SSR]
+    ./app/page.js [Client Component SSR]
+    ./app/page.js [Server Component]
+[00:00:05.392] Browser ERROR   ./components/CatTTS.js:5:1
+Export ElevenLabsProvider doesn't exist in target module
+  3 |
+  4 | import { useState } from "react";
+> 5 | import { ElevenLabsProvider, useElevenLabs } from "@elevenlabs/react";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  6 |
+  7 | export default function CatTTS() {
+  8 |   const [text, setText] = useState("");
+
+The export ElevenLabsProvider was not found in module [project]/node_modules/@elevenlabs/react/dist/lib.modern.js [app-ssr] (ecmascript).
+Did you mean to import useConversation?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./components/CatTTS.js [Client Component Browser]
+    ./app/page.js [Client Component Browser]
+    ./app/page.js [Server Component]
+
+  Client Component SSR:
+    ./components/CatTTS.js [Client Component SSR]
+    ./app/page.js [Client Component SSR]
+    ./app/page.js [Server Component]
+[00:00:05.393] Browser ERROR   ./components/CatTTS.js:5:1
+Export useElevenLabs doesn't exist in target module
+  3 |
+  4 | import { useState } from "react";
+> 5 | import { ElevenLabsProvider, useElevenLabs } from "@elevenlabs/react";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  6 |
+  7 | export default function CatTTS() {
+  8 |   const [text, setText] = useState("");
+
+The export useElevenLabs was not found in module [project]/node_modules/@elevenlabs/react/dist/lib.modern.js [app-client] (ecmascript).
+Did you mean to import RealtimeEvents?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./components/CatTTS.js [Client Component Browser]
+    ./app/page.js [Client Component Browser]
+    ./app/page.js [Server Component]
+
+  Client Component SSR:
+    ./components/CatTTS.js [Client Component SSR]
+    ./app/page.js [Client Component SSR]
+    ./app/page.js [Server Component]
+[00:00:05.393] Browser ERROR   ./components/CatTTS.js:5:1
+Export useElevenLabs doesn't exist in target module
+  3 |
+  4 | import { useState } from "react";
+> 5 | import { ElevenLabsProvider, useElevenLabs } from "@elevenlabs/react";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  6 |
+  7 | export default function CatTTS() {
+  8 |   const [text, setText] = useState("");
+
+The export useElevenLabs was not found in module [project]/node_modules/@elevenlabs/react/dist/lib.modern.js [app-ssr] (ecmascript).
+Did you mean to import RealtimeEvents?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./components/CatTTS.js [Client Component Browser]
+    ./app/page.js [Client Component Browser]
+    ./app/page.js [Server Component]
+
+  Client Component SSR:
+    ./components/CatTTS.js [Client Component SSR]
+    ./app/page.js [Client Component SSR]
+    ./app/page.js [Server Component]
+[00:00:05.393] Browser ERROR   ./components/CatTTS.js:5:1
+Export ElevenLabsProvider doesn't exist in target module
+  3 |
+  4 | import { useState } from "react";
+> 5 | import { ElevenLabsProvider, useElevenLabs } from "@elevenlabs/react";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  6 |
+  7 | export default function CatTTS() {
+  8 |   const [text, setText] = useState("");
+
+The export ElevenLabsProvider was not found in module [project]/node_modules/@elevenlabs/react/dist/lib.modern.js [app-client] (ecmascript).
+Did you mean to import useConversation?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./components/CatTTS.js [Client Component Browser]
+    ./app/page.js [Client Component Browser]
+    ./app/page.js [Server Component]
+
+  Client Component SSR:
+    ./components/CatTTS.js [Client Component SSR]
+    ./app/page.js [Client Component SSR]
+    ./app/page.js [Server Component]
+[00:00:05.393] Browser ERROR   ./components/CatTTS.js:5:1
+Export ElevenLabsProvider doesn't exist in target module
+  3 |
+  4 | import { useState } from "react";
+> 5 | import { ElevenLabsProvider, useElevenLabs } from "@elevenlabs/react";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  6 |
+  7 | export default function CatTTS() {
+  8 |   const [text, setText] = useState("");
+
+The export ElevenLabsProvider was not found in module [project]/node_modules/@elevenlabs/react/dist/lib.modern.js [app-ssr] (ecmascript).
+Did you mean to import useConversation?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./components/CatTTS.js [Client Component Browser]
+    ./app/page.js [Client Component Browser]
+    ./app/page.js [Server Component]
+
+  Client Component SSR:
+    ./components/CatTTS.js [Client Component SSR]
+    ./app/page.js [Client Component SSR]
+    ./app/page.js [Server Component]
+[00:00:05.394] Browser ERROR   ./components/CatTTS.js:5:1
+Export useElevenLabs doesn't exist in target module
+  3 |
+  4 | import { useState } from "react";
+> 5 | import { ElevenLabsProvider, useElevenLabs } from "@elevenlabs/react";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  6 |
+  7 | export default function CatTTS() {
+  8 |   const [text, setText] = useState("");
+
+The export useElevenLabs was not found in module [project]/node_modules/@elevenlabs/react/dist/lib.modern.js [app-client] (ecmascript).
+Did you mean to import RealtimeEvents?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./components/CatTTS.js [Client Component Browser]
+    ./app/page.js [Client Component Browser]
+    ./app/page.js [Server Component]
+
+  Client Component SSR:
+    ./components/CatTTS.js [Client Component SSR]
+    ./app/page.js [Client Component SSR]
+    ./app/page.js [Server Component]
+[00:00:05.394] Browser ERROR   ./components/CatTTS.js:5:1
+Export useElevenLabs doesn't exist in target module
+  3 |
+  4 | import { useState } from "react";
+> 5 | import { ElevenLabsProvider, useElevenLabs } from "@elevenlabs/react";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  6 |
+  7 | export default function CatTTS() {
+  8 |   const [text, setText] = useState("");
+
+The export useElevenLabs was not found in module [project]/node_modules/@elevenlabs/react/dist/lib.modern.js [app-ssr] (ecmascript).
+Did you mean to import RealtimeEvents?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./components/CatTTS.js [Client Component Browser]
+    ./app/page.js [Client Component Browser]
+    ./app/page.js [Server Component]
+
+  Client Component SSR:
+    ./components/CatTTS.js [Client Component SSR]
+    ./app/page.js [Client Component SSR]
+    ./app/page.js [Server Component]

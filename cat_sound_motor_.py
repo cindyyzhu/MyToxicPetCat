@@ -9,26 +9,6 @@ import glob
 import time
 from motors_just_fcns import motorA_forward, motorB_forward, stop_motors, cleanup_motors
 
-
-import asyncio
-import websockets
-import json
-
-connected_clients = set()
-
-async def ws_handler(websocket):
-    connected_clients.add(websocket)
-    try:
-        await websocket.wait_closed()
-    finally:
-        connected_clients.remove(websocket)
-
-async def send_ui_update(data):
-    if connected_clients:
-        msg = json.dumps(data)
-        await asyncio.gather(*(ws.send(msg) for ws in connected_clients))
-
-
 # ---------------------------- CONFIG ----------------------------
 API_KEY = os.getenv("ELEVENLABS_API_KEY")
 if not API_KEY:
@@ -272,49 +252,33 @@ def agent_reply(user_text):
     return ""
 
 # ---------------------------- MAIN LOOP ----------------------------
-async def voice_loop():
-    print("\nVoice agent ready! Speak into your mic.\n")
+print("\nVoice agent ready! Speak into your mic.")
+print("Press Enter to start recording a message, Ctrl+C to exit.\n")
 
-    try:
-        while True:
-            input("Press Enter to record your message...")
+try:
+    while True:
+        input("Press Enter to record your message...")
+        audio_np = record_audio(RECORD_SECONDS, DEFAULT_SR)
+        print("Processing...")
+        user_text = speech_to_text(audio_np, DEFAULT_SR)
+        if not user_text:
+            print("No speech detected.\n")
+            continue
 
-            await send_ui_update({
-                "mood": "responding",
-                "clear_response": True
-            })
+        print(f"\nYOU: {user_text}")
+        reply_text = agent_reply(user_text)
+        if not reply_text:
+            print("Agent did not respond.\n")
+            continue
 
-            audio_np = record_audio(RECORD_SECONDS, DEFAULT_SR)
+        print(f"CAT AI: {reply_text}\n")
+        data, sr = get_speech_from_elevenlabs(reply_text)
 
-            user_text = speech_to_text(audio_np, DEFAULT_SR)
-            if not user_text:
-                continue
+        if data is not None and sr is not None:
+            play_cat_sound_and_move_motor(data, sr)
+        else:
+            print("No data was returned.")
 
-            reply_text = agent_reply(user_text)
-            if not reply_text:
-                continue
-
-            # Send text to frontend with typing effect
-            await send_ui_update({
-                "response": reply_text,
-                "typing": True,
-                "typing_speed": 40
-            })
-
-            data, sr = get_speech_from_elevenlabs(reply_text)
-
-            if data is not None:
-                play_cat_sound_and_move_motor(data, sr)
-
-            await send_ui_update({
-                "mood": "idle"
-            })
-
-    except KeyboardInterrupt:
-        cleanup_motors()
-
-async def main():
-    server = await websockets.serve(ws_handler, "localhost", 8765)
-    await voice_loop()
-
-asyncio.run(main())
+except KeyboardInterrupt:
+    print("\nExiting. Bye!")
+    cleanup_motors()
