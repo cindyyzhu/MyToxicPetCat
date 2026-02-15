@@ -6,6 +6,7 @@ import requests
 from io import BytesIO
 import random
 import glob
+import time
 from motors_just_fcns import motorA_forward, motorB_forward, stop_motors, cleanup_motors
 
 # ---------------------------- CONFIG ----------------------------
