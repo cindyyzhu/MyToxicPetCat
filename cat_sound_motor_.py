@@ -6,6 +6,7 @@ import requests
 from io import BytesIO
 import random
 import glob
+from motors import motorA_forward, motorB_forward, stop_motors, cleanup_motors
 
 # ---------------------------- CONFIG ----------------------------
 API_KEY = os.getenv("ELEVENLABS_API_KEY")
@@ -105,8 +106,6 @@ def get_amplitude_envelope(data, sr, fps=30):
     return normalized_rms
 
 # ---------------------------- HELPER: PLAY SOUND AND MOVE MOTORS ----------------------------
-
-from motors import *
 
 def play_cat_sound_and_move_motor(data, sr):
     # 1. Play intro sound
@@ -223,7 +222,12 @@ try:
 
         print(f"CAT AI: {reply_text}\n")
         data, sr = get_speech_from_elevenlabs(reply_text)
-        play_cat_sound_and_move_motor(data, sr)
+
+        if data is not None and sr is not None:
+            play_cat_sound_and_move_motor(data, sr)
+        else:
+            print("No data was returned.")
 
 except KeyboardInterrupt:
     print("\nExiting. Bye!")
+    cleanup_motors()
