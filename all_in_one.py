@@ -774,19 +774,13 @@ async def voice_loop():
     except KeyboardInterrupt:
         cleanup_motors()
 
-# ---------------------------- HTTP SERVER ----------------------------
-def start_http_server():
-    server = HTTPServer(("0.0.0.0", HTTP_PORT), SimpleHTTPRequestHandler)
-    print(f"🌐 UI → http://localhost:{HTTP_PORT}")
-    server.serve_forever()
-
 # ---------------------------- MAIN ----------------------------
 async def main():
     # Run HTTP server in separate thread
     Thread(target=start_http_server, daemon=True).start()
 
     # Start WebSocket server
-    await websockets.serve(ws_handler, "0.0.0.0", WS_PORT)
+    await websockets.serve(ws_handler, "ws://localhost:8765", WS_PORT)
     print(f"🌐 WebSocket server running on ws://localhost:{WS_PORT}")
 
     # Start voice loop
