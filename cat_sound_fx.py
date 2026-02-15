@@ -88,15 +88,15 @@ def speech_to_text(audio_np, samplerate):
 # ---------------------------- HELPER: PLAY AUDIO ----------------------------
 def play_audio(audio_data, sr):
     audio_data = resample_audio(audio_data, sr, DEFAULT_SR)
-
-    # ensure float32 (PortAudio prefers this)
     audio_data = audio_data.astype(np.float32)
 
-    #audio_data = audio_data / np.max(np.abs(audio_data))
-
+    peak = np.max(np.abs(audio_data))
+    if peak > 0:
+        audio_data = audio_data / peak
 
     sd.play(audio_data, DEFAULT_SR)
     sd.wait()
+
 
 
 
