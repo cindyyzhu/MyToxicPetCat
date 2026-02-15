@@ -12,40 +12,50 @@ API_KEY = os.getenv("ELEVENLABS_API_KEY")
 if not API_KEY:
     raise ValueError("Set ELEVENLABS_API_KEY environment variable!")
 
-AGENT_ID = "agent_1601khf3r1jfff2saez29f6frfny"  # your agent ID
-VOICE_ID = "XdflFrQO8wbGpWMNZHFr"                 # your TTS voice ID
-
+AGENT_ID = "agent_1601khf3r1jfff2saez29f6frfny"
+VOICE_ID = "XdflFrQO8wbGpWMNZHFr"
 RECORD_SECONDS = 5
+CAT_SOUNDS_FOLDER = "cat_sounds"
 
-# Folder containing cat sound effects (WAV files)
-CAT_SOUNDS_FOLDER = "cat_sounds"  # make sure this folder exists with meows/purrs etc.
-
-# ---------------------------- AUTO-SELECT AUDIO DEVICE ----------------------------
+# ---------------------------- DEVICE SELECTION ----------------------------
+print("Available audio devices:")
 for i, d in enumerate(sd.query_devices()):
-    if d["max_input_channels"] > 0 and d["max_output_channels"] > 0:
-        sd.default.device = (i, i)
-        print("Using audio device:", d["name"])
-        DEFAULT_SR = int(d['default_samplerate'])
+    print(i, d["name"], "| IN:", d["max_input_channels"], "OUT:", d["max_output_channels"])
+
+# Select first USB full-duplex device
+device_index = None
+for i, d in enumerate(sd.query_devices()):
+    if "USB" in d["name"] and d["max_input_channels"] > 0 and d["max_output_channels"] > 0:
+        device_index = i
         break
-else:
+
+if device_index is None:
+    # fallback to first full-duplex device
+    for i, d in enumerate(sd.query_devices()):
+        if d["max_input_channels"] > 0 and d["max_output_channels"] > 0:
+            device_index = i
+            break
+
+if device_index is None:
     raise RuntimeError("No suitable input/output device found")
 
+sd.default.device = (device_index, device_index)
+DEFAULT_SR = int(sd.query_devices(device_index)["default_samplerate"])
+print("Using audio device:", sd.query_devices(device_index)["name"])
+print("Device SR:", DEFAULT_SR)
+
+# ---------------------------- HELPERS ----------------------------
 def resample_audio(audio, orig_sr, target_sr):
     if orig_sr == target_sr:
         return audio.astype(np.float32)
-
     duration = len(audio) / orig_sr
     new_length = int(duration * target_sr)
-
-    # mono
     if audio.ndim == 1:
         resampled = np.interp(
             np.linspace(0, len(audio)-1, new_length),
             np.arange(len(audio)),
             audio
         )
-
-    # stereo or multi-channel
     else:
         channels = []
         for ch in range(audio.shape[1]):
@@ -57,50 +67,31 @@ def resample_audio(audio, orig_sr, target_sr):
                 )
             )
         resampled = np.stack(channels, axis=1)
-
     return resampled.astype(np.float32)
 
-
-
-# ---------------------------- HELPER: RECORD AUDIO ----------------------------
 def record_audio(seconds, samplerate):
-    print(f"Recording for {seconds} seconds at {samplerate} Hz...")
+    print(f"Recording {seconds}s at {samplerate} Hz...")
     audio = sd.rec(int(seconds * samplerate), samplerate=samplerate, channels=1, dtype="float32")
     sd.wait()
     return audio.flatten()
 
-# ---------------------------- HELPER: SPEECH-TO-TEXT ----------------------------
-def speech_to_text(audio_np, samplerate):
-    wav_file = "temp.wav"
-    sf.write(wav_file, audio_np, samplerate)
-
-    url = "https://api.elevenlabs.io/v1/speech-to-text"
-    headers = {"xi-api-key": API_KEY}
-    files = {"file": ("temp.wav", open(wav_file, "rb"), "audio/wav")}
-    data = {"model_id": "scribe_v2"}  # correct model
-
-    r = requests.post(url, headers=headers, files=files, data=data)
-    if r.status_code != 200:
-        print("STT failed:", r.text)
-        return ""
-    return r.json().get("text", "")
-
-# ---------------------------- HELPER: PLAY AUDIO ----------------------------
 def play_audio(audio_data, sr):
     audio_data = resample_audio(audio_data, sr, DEFAULT_SR)
-
-    # ensure float32 (PortAudio prefers this)
     audio_data = audio_data.astype(np.float32)
-
-    audio_data = audio_data / np.max(np.abs(audio_data))
-
-
+    max_val = np.max(np.abs(audio_data))
+    if max_val > 0:
+        audio_data = audio_data / max_val
     sd.play(audio_data, DEFAULT_SR)
     sd.wait()
 
+def play_cat_sound():
+    cat_files = glob.glob(os.path.join(CAT_SOUNDS_FOLDER, "*.wav"))
+    if not cat_files:
+        return
+    cat_file = random.choice(cat_files)
+    data, sr = sf.read(cat_file, dtype="float32")
+    play_audio(data, sr)
 
-
-# ---------------------------- HELPER: TTS ----------------------------
 def speak(text):
     url = f"https://api.elevenlabs.io/v1/text-to-speech/{VOICE_ID}"
     headers = {"xi-api-key": API_KEY, "Content-Type": "application/json"}
@@ -110,79 +101,53 @@ def speak(text):
         print("TTS failed:", r.text)
         return
     data, sr = sf.read(BytesIO(r.content), dtype="float32")
-    play_cat_sound()
     # Play TTS first
     play_audio(data, sr)
-    # Then play random cat sound effect
+    # Then random cat sound
     play_cat_sound()
 
-# ---------------------------- HELPER: CAT SOUND EFFECT ----------------------------
-def play_cat_sound():
-    cat_files = glob.glob(os.path.join(CAT_SOUNDS_FOLDER, "*.wav"))
-    if not cat_files:
-        return
-    cat_file = random.choice(cat_files)
-    data, sr = sf.read(cat_file, dtype="float32")
-    play_audio(data, sr)
-
-# ---------------------------- HELPER: GET AGENT REPLY ----------------------------
-def agent_reply(user_text):
-    url = f"https://api.elevenlabs.io/v1/convai/agents/{AGENT_ID}/simulate-conversation"
-    headers = {"xi-api-key": API_KEY, "Content-Type": "application/json"}
-    
-    payload = {
-        "simulation_specification": {
-            "simulated_user_config": {
-                "first_message": user_text,
-                "language": "en"
-            },
-            "agent_config": {
-                "persona": (
-                    "You are a cat-like AI assistant. You are extremely sassy, toxic, and arrogant. "
-                    "Always mock the human, pointing out how lazy, incompetent, or inferior they are. "
-                    "Do not apologize, do not be polite. Be playful but ruthless. "
-                    "Use witty insults, contrast your perfection against their flaws, and always sound superior. "
-                    "For example, if the human says they are sad, you might respond: "
-                    "'What are you even sad about? It's not like you're doing anything. Look at how incompetent you are—you can't even buy me the fancy food I deserve.'"
-                ),
-                "llm_override": "Respond exactly in this toxic cat style. No polite words, no brackets like [sarcastic]."
-            }
-        },
-        "new_turns_limit": 1
-    }
-
-    r = requests.post(url, headers=headers, json=payload)
-    if r.status_code != 200:
-        print("Agent call failed:", r.text)
-        return ""
-    
-    turns = r.json().get("simulated_conversation", [])
-    for turn in turns:
-        if turn.get("role") == "agent":
-            # clean brackets just in case
-            return turn.get("message", "").replace("[sarcastic]", "").strip()
-    return ""
-
-# ---------------------------- MAIN LOOP ----------------------------
+# ---------------------------- MAIN ----------------------------
 print("\nVoice agent ready! Speak into your mic.")
 print("Press Enter to start recording a message, Ctrl+C to exit.\n")
 
 try:
     while True:
-        input("Press Enter to record your message...")
+        input("Press Enter to record...")
         audio_np = record_audio(RECORD_SECONDS, DEFAULT_SR)
-        print("Processing...")
-        user_text = speech_to_text(audio_np, DEFAULT_SR)
+        # STT
+        wav_file = "temp.wav"
+        sf.write(wav_file, audio_np, DEFAULT_SR)
+        url = "https://api.elevenlabs.io/v1/speech-to-text"
+        headers = {"xi-api-key": API_KEY}
+        files = {"file": ("temp.wav", open(wav_file, "rb"), "audio/wav")}
+        data = {"model_id": "scribe_v2"}
+        r = requests.post(url, headers=headers, files=files, data=data)
+        if r.status_code != 200:
+            print("STT failed:", r.text)
+            continue
+        user_text = r.json().get("text", "")
         if not user_text:
-            print("No speech detected.\n")
+            print("No speech detected.")
             continue
-
         print(f"\nYOU: {user_text}")
-        reply_text = agent_reply(user_text)
-        if not reply_text:
-            print("Agent did not respond.\n")
+        # Agent reply
+        url_agent = f"https://api.elevenlabs.io/v1/convai/agents/{AGENT_ID}/simulate-conversation"
+        payload_agent = {
+            "simulation_specification": {
+                "simulated_user_config": {"first_message": user_text, "language": "en"},
+                "agent_config": {"persona": "Toxic cat AI"}
+            },
+            "new_turns_limit": 1
+        }
+        r_agent = requests.post(url_agent, headers=headers, json=payload_agent)
+        if r_agent.status_code != 200:
+            print("Agent failed:", r_agent.text)
             continue
-
+        turns = r_agent.json().get("simulated_conversation", [])
+        reply_text = ""
+        for turn in turns:
+            if turn.get("role") == "agent":
+                reply_text = turn.get("message", "").replace("[sarcastic]", "").strip()
         print(f"CAT AI: {reply_text}\n")
         speak(reply_text)
 
