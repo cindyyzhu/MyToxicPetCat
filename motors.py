@@ -1,29 +1,49 @@
-from gpiozero import Motor, PWMOutputDevice
-from time import sleep
+import RPi.GPIO as GPIO
+import time
 
-# IN1, IN2
-motor1 = Motor(forward=16, backward=20)
-motor1_enable = PWMOutputDevice(21)  # EN1 pin
+# Pin setup
+MotorA_in1 = 17
+MotorA_in2 = 27
+MotorB_in3 = 22
+MotorB_in4 = 23
+MotorA_en = 18
+MotorB_en = 24
 
-motor2 = Motor(forward=19, backward=26)
-motor2_enable = PWMOutputDevice(13)  # EN2 pin
+GPIO.setmode(GPIO.BCM)
+GPIO.setup([MotorA_in1, MotorA_in2, MotorB_in3, MotorB_in4], GPIO.OUT)
+GPIO.setup([MotorA_en, MotorB_en], GPIO.OUT)
 
-# Enable motors
-motor1_enable.on()
-motor2_enable.on()
+# PWM setup for speed control
+pwmA = GPIO.PWM(MotorA_en, 100)  # 100Hz
+pwmB = GPIO.PWM(MotorB_en, 100)
+pwmA.start(0)
+pwmB.start(0)
 
-print("Running the motors...")
+def motorA_forward(speed=50):
+    GPIO.output(MotorA_in1, GPIO.HIGH)
+    GPIO.output(MotorA_in2, GPIO.LOW)
+    pwmA.ChangeDutyCycle(speed)
 
-while True:
-    motor1.forward()
-    motor2.forward()
-    sleep(3)
-    motor1.stop()
-    motor2.stop()
-    sleep(0.1)
-    motor1.backward()
-    motor2.backward()
-    sleep(3)
-    motor1.stop()
-    motor2.stop()
-    sleep(3)
+def motorB_forward(speed=50):
+    GPIO.output(MotorB_in3, GPIO.HIGH)
+    GPIO.output(MotorB_in4, GPIO.LOW)
+    pwmB.ChangeDutyCycle(speed)
+
+def stop_motors():
+    GPIO.output([MotorA_in1, MotorA_in2, MotorB_in3, MotorB_in4], GPIO.LOW)
+    pwmA.ChangeDutyCycle(0)
+    pwmB.ChangeDutyCycle(0)
+
+try:
+    print("Motors forward for 3 seconds")
+    motorA_forward(80)
+    motorB_forward(80)
+    time.sleep(3)
+
+    print("Stopping motors")
+    stop_motors()
+
+finally:
+    pwmA.stop()
+    pwmB.stop()
+    GPIO.cleanup()
