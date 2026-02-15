@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Toxic Pet Cat</title>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #1a0a2e;
+            --bg-mid: #2d1b4e;
+            --accent-pink: #ff6b9d;
+            --accent-cyan: #00d9ff;
+            --accent-yellow: #ffd93d;
+            --text-light: #f0f0f0;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'VT323', monospace;
+            background: linear-gradient(135deg, var(--bg-dark) 0%, var(--bg-mid) 100%);
+            color: var(--text-light);
+            overflow: hidden;
+            height: 100vh;
+            position: relative;
+        }
+
+        /* Scanline effect */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: repeating-linear-gradient(
+                0deg,
+                rgba(0, 0, 0, 0.15),
+                rgba(0, 0, 0, 0.15) 1px,
+                transparent 1px,
+                transparent 2px
+            );
+            pointer-events: none;
+            z-index: 1000;
+            animation: scanline 8s linear infinite;
+        }
+
+        @keyframes scanline {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(100px); }
+        }
+
+        /* Floating particles */
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: var(--accent-cyan);
+            opacity: 0.3;
+            animation: float 15s infinite ease-in-out;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0) translateX(0); }
+            50% { transform: translateY(-100vh) translateX(50px); }
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            z-index: 1;
+        }
+
+        .header {
+            font-family: 'Press Start 2P', monospace;
+            font-size: 24px;
+            text-align: center;
+            margin-bottom: 20px;
+            color: var(--accent-pink);
+            text-shadow: 
+                0 0 10px var(--accent-pink),
+                0 0 20px var(--accent-pink),
+                0 0 30px var(--accent-cyan);
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes glow {
+            from { text-shadow: 0 0 10px var(--accent-pink), 0 0 20px var(--accent-pink); }
+            to { text-shadow: 0 0 20px var(--accent-pink), 0 0 30px var(--accent-pink), 0 0 40px var(--accent-cyan); }
+        }
+
+        .main-content {
+            flex: 1;
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 30px;
+            align-items: center;
+        }
+
+        .cat-display {
+            background: rgba(0, 0, 0, 0.4);
+            border: 4px solid var(--accent-cyan);
+            box-shadow: 
+                0 0 20px rgba(0, 217, 255, 0.3),
+                inset 0 0 20px rgba(0, 0, 0, 0.5);
+            padding: 40px;
+            border-radius: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+            min-height: 400px;
+        }
+
+        .cat-display::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(135deg, var(--accent-pink), var(--accent-cyan));
+            border-radius: 20px;
+            z-index: -1;
+        }
+
+        .cat-image-container {
+            position: relative;
+            width: 100%;
+            height: 400px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .cat-image {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            animation: catBounce 3s ease-in-out infinite;
+            transition: opacity 0.3s ease;
+        }
+
+        .cat-video {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            animation: catBounce 3s ease-in-out infinite;
+            transition: opacity 0.3s ease;
+        }
+
+        .cat-image.hidden,
+        .cat-video.hidden {
+            opacity: 0;
+            position: absolute;
+        }
+
+        @keyframes catBounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        /* Response UI removed: speech box and mood indicator styles deleted */
+
+        @keyframes slideIn {
+            from { transform: translateX(-20px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        .version-info {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            font-family: 'Press Start 2P', monospace;
+            font-size: 8px;
+            color: rgba(255, 255, 255, 0.3);
+        }
+
+        @media (max-width: 1024px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+            .header {
+                font-size: 18px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Floating particles -->
+    <div class="particle" style="left: 10%; animation-delay: 0s;"></div>
+    <div class="particle" style="left: 30%; animation-delay: 2s;"></div>
+    <div class="particle" style="left: 50%; animation-delay: 4s;"></div>
+    <div class="particle" style="left: 70%; animation-delay: 6s;"></div>
+    <div class="particle" style="left: 90%; animation-delay: 8s;"></div>
+
+    <div class="container">
+        <div class="header">
+            ⟨⟨ MY TOXIC PET CAT ⟩⟩
+        </div>
+
+        <div class="main-content">
+            <div class="cat-display">
+                <div class="cat-image-container" id="catImageContainer">
+                    <!-- Cat images/videos will be dynamically loaded here -->
+                    <!-- Supports: PNG, JPG, GIF, MP4, WEBM -->
+                </div>
+            </div>
+        </div>
+
+        <div class="version-info">v2.0.0 | Pi-CatBot Custom</div>
+    </div>
+
+    <script>
+        let currentMood = 'idle';
+        
+        // Asset paths - using single GIF for responding state
+        const assetPaths = {
+            idle: 'assets/cat-idle.gif',              // Still image when idle
+            responding: 'assets/cat-responding.gif',   // GIF when responding/active
+        };
+
+        // Detect file type based on extension
+        function getFileType(path) {
+            const ext = path.split('.').pop().toLowerCase();
+            if (ext === 'mp4' || ext === 'webm' || ext === 'mov') {
+                return 'video';
+            }
+            return 'image'; // png, jpg, gif, webp, svg
+        }
+
+        // Create and load assets dynamically
+        function createAssetElement(mood, path) {
+            const container = document.getElementById('catImageContainer');
+            const fileType = getFileType(path);
+            let element;
+
+            if (fileType === 'video') {
+                element = document.createElement('video');
+                element.className = 'cat-video hidden';
+                element.loop = true;
+                element.muted = true;
+                element.playsInline = true;
+                element.autoplay = false;
+                element.src = path;
+            } else {
+                element = document.createElement('img');
+                element.className = 'cat-image hidden';
+                element.src = path;
+                element.alt = `${mood} Cat`;
+            }
+
+            element.id = `catAsset-${mood}`;
+            element.dataset.mood = mood;
+            element.dataset.type = fileType;
+
+            // Error handling
+            element.onerror = function() {
+                console.error(`Failed to load asset for ${mood}: ${path}`);
+                this.style.display = 'none';
+            };
+
+            // Success handling
+            if (fileType === 'image') {
+                element.onload = function() {
+                    console.log(`✅ Loaded ${mood} image: ${path}`);
+                };
+            } else {
+                element.onloadeddata = function() {
+                    console.log(`✅ Loaded ${mood} video: ${path}`);
+                };
+            }
+
+            container.appendChild(element);
+            return element;
+        }
+
+        // Load all assets on page load
+        window.addEventListener('DOMContentLoaded', () => {
+            const container = document.getElementById('catImageContainer');
+            container.innerHTML = ''; // Clear container
+
+            console.log('🎬 Loading assets...');
+
+            // Create elements for all moods
+            for (const [mood, path] of Object.entries(assetPaths)) {
+                createAssetElement(mood, path);
+            }
+
+            // Response UI removed; no speech box to clear on load
+
+            // Show idle by default
+            setTimeout(() => {
+                const idleElement = document.getElementById('catAsset-idle');
+                if (idleElement) {
+                    idleElement.classList.remove('hidden');
+                    console.log('🐱 Starting in IDLE state (idle GIF will play continuously)');
+                    if (idleElement.tagName === 'VIDEO') {
+                        idleElement.play().catch(e => console.log('Video autoplay prevented'));
+                    }
+                } else {
+                    console.error('❌ Could not find idle asset!');
+                }
+            }, 100);
+        });
+
+        // Change mood and switch displayed image/video
+        function changeMood(mood) {
+            console.log(`🔄 Changing mood to: ${mood}`);
+            currentMood = mood;
+
+            const allAssets = document.querySelectorAll('.cat-image, .cat-video');
+            console.log(`   Found ${allAssets.length} total assets`);
+
+            allAssets.forEach(asset => {
+                asset.classList.add('hidden');
+                if (asset.tagName === 'VIDEO') {
+                    asset.pause();
+                    asset.currentTime = 0;
+                }
+            });
+
+            const targetAsset = document.getElementById(`catAsset-${mood}`);
+            if (targetAsset) {
+                console.log(`   ✅ Found asset for ${mood}, type: ${targetAsset.tagName}`);
+                targetAsset.classList.remove('hidden');
+                if (targetAsset.tagName === 'VIDEO') {
+                    targetAsset.play().catch(e => {
+                        console.error('   ❌ Video play failed:', e);
+                    });
+                }
+            } else {
+                console.error(`   ❌ No asset found for mood: ${mood}`);
+                console.log(`   Available assets:`, Array.from(allAssets).map(a => a.id));
+            }
+        }
+
+        // Response text handling removed (speech box and typing animation deleted)
+
+        // WebSocket connection (uncomment when ready to use)
+        /*
+        const ws = new WebSocket('ws://localhost:8765');
+        ws.onmessage = (event) => {
+            const data = JSON.parse(event.data);
+            updateFromBackend(data);
+        };
+        */
+
+        // Test auto-toggle removed: idle GIF will play continuously.
+    </script>
+</body>
+</html>
