@@ -176,57 +176,49 @@ def play_cat_sound_and_move_motor(data, sr):
     for amp in amplitudes:
         start_time = time.time()
         
-        # 4. Loop through the pre-calculated motor speeds
+        # --- DC Motor Logic ---
+        # amp is a value between 0.0 and 1.0
+        # We use a threshold (0.1) so the mouth completely stops during pauses/breaths
+        if amp > 0.1: 
+            # DC motors need a minimum speed to overcome physical friction.
+            # Let's map the amplitude to a speed between 40 and 100.
+            speed = int((amp * 100)) 
 
-    if amp > 0.1:
-        speed = int(40 + amp * 60)   # 40–100 safe range
+            if amp > 0.9:
+                motorA_forward(speed=speed) 
+                motorB_forward(speed=speed)
+            
+            elif amp > 0.7:
+                motorA_forward(speed=speed) 
+                motorB_forward(speed=int(speed * 0.8))
 
-        # pick a motion pattern based on frame index
-        pattern = i % 6
+            elif amp > 0.5:
+                motorA_forward(speed=speed)
+                motorB_backward(speed=speed)
 
-        # --- PATTERN 0: normal forward ---
-        if pattern == 0:
-            motorA_forward(speed=speed)
-            motorB_forward(speed=speed)
+            elif amp > 0.3:
+                motorA_backward(speed=speed)
+                motorB_forward(speed=speed)
+            
+            elif amp >0.2:
+                motorA_forward(speed=int(speed * 0.8)) 
+                motorB_forward(speed=speed)
 
-        # --- PATTERN 1: reverse burst ---
-        elif pattern == 1:
-            motorA_backward(speed=speed)
-            motorB_backward(speed=speed)
+            if amp >= 0.2 and amp <= 0.5:
+                motorA_forward(speed=speed) 
+                motorB_forward(speed=int(speed * 0.6))
 
-        # --- PATTERN 2: spin in place ---
-        elif pattern == 2:
-            motorA_forward(speed=speed)
-            motorB_backward(speed=speed)
-
-        # --- PATTERN 3: opposite spin ---
-        elif pattern == 3:
-            motorA_backward(speed=speed)
-            motorB_forward(speed=speed)
-
-        # --- PATTERN 4: curve left ---
-        elif pattern == 4:
-            motorA_forward(speed=speed)
-            motorB_forward(speed=int(speed * 0.4))
-
-        # --- PATTERN 5: curve right ---
+            if amp > 0.6:  # If the audio is very loud, add some random jitter for expressiveness
+                if random.random() < 0.3:  # 30% chance to add jitter on any given frame
+                    motorA_forward(speed=int(speed * random.uniform(0.8, 1.2)))
+                    motorB_forward(speed=int(speed * random.uniform(0.8, 1.2)))
         else:
-            motorA_forward(speed=int(speed * 0.4))
-            motorB_forward(speed=speed)
-
-        # occasional quick flip for extra personality
-        if amp > 0.7 and (i % 10 == 0):
-            motorA_backward(speed=80)
-            motorB_forward(speed=80)
-            time.sleep(0.05)
-
-    else:
-        stop_motors()
-
-    # 5. Keep the loop synchronized with the audio track
-    elapsed = time.time() - start_time
-    time.sleep(max(0, delay_between_frames - elapsed))
-
+            # If the audio is quiet, stop moving
+            stop_motors()
+            
+        # 5. Keep the loop synchronized with the audio track
+        elapsed = time.time() - start_time
+        time.sleep(max(0, delay_between_frames - elapsed))
         
     # 6. Cleanup
     stop_motors() # Ensure mouth is completely stopped at the end of the sentence
