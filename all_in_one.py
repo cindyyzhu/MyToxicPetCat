@@ -780,7 +780,7 @@ async def main():
     Thread(target=start_http_server, daemon=True).start()
 
     # Start WebSocket server
-    await websockets.serve(ws_handler, "ws://localhost:8765", WS_PORT)
+    await websockets.serve(ws_handler, "0.0.0.0", WS_PORT)
     print(f"🌐 WebSocket server running on ws://localhost:{WS_PORT}")
 
     # Start voice loop
