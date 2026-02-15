@@ -27,17 +27,17 @@ pwmB.start(0)
 LEFT_EAR_CHANNEL = 0
 RIGHT_EAR_CHANNEL = 1
 
-GPIO.setup(LEFT_EAR_PIN, GPIO.OUT)
-GPIO.setup(RIGHT_EAR_PIN, GPIO.OUT)
+#GPIO.setup(LEFT_EAR_PIN, GPIO.OUT)
+#GPIO.setup(RIGHT_EAR_PIN, GPIO.OUT)
 
-left_ear = GPIO.PWM(LEFT_EAR_PIN, 50)
-right_ear = GPIO.PWM(RIGHT_EAR_PIN, 50)
+#left_ear = GPIO.PWM(LEFT_EAR_PIN, 50)
+#right_ear = GPIO.PWM(RIGHT_EAR_PIN, 50)
 
-left_ear.start(0)
-right_ear.start(0)
+#left_ear.start(0)
+#right_ear.start(0)
 
-left_current_angle = 90
-right_current_angle = 90
+#left_current_angle = 90
+#right_current_angle = 90
 
 # ==========================================
 # FUNCTIONS (Available to your main script)
