@@ -1,5 +1,14 @@
 {
+  "name": "my-toxic-pet-cat",
+  "version": "1.0.0",
+  "scripts": {
+    "dev": "next dev",         
+    "start": "next start"
+  },
+  
   "dependencies": {
-    "@elevenlabs/elevenlabs-js": "^2.35.0"
+    "@elevenlabs/elevenlabs-js": "^2.35.0",
+    "@elevenlabs/react": "^0.14.0"
   }
+
 }
