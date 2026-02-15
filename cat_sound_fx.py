@@ -30,6 +30,18 @@ for i, d in enumerate(sd.query_devices()):
 else:
     raise RuntimeError("No suitable input/output device found")
 
+def resample_audio(audio, orig_sr, target_sr):
+    if orig_sr == target_sr:
+        return audio
+    duration = len(audio) / orig_sr
+    new_length = int(duration * target_sr)
+    return np.interp(
+        np.linspace(0, len(audio), new_length),
+        np.arange(len(audio)),
+        audio
+    ).astype(np.float32)
+
+
 # ---------------------------- HELPER: RECORD AUDIO ----------------------------
 def record_audio(seconds, samplerate):
     print(f"Recording for {seconds} seconds at {samplerate} Hz...")
@@ -55,8 +67,10 @@ def speech_to_text(audio_np, samplerate):
 
 # ---------------------------- HELPER: PLAY AUDIO ----------------------------
 def play_audio(audio_data, sr):
-    sd.play(audio_data, sr)
+    audio_data = resample_audio(audio_data, sr, DEFAULT_SR)
+    sd.play(audio_data, DEFAULT_SR)
     sd.wait()
+
 
 # ---------------------------- HELPER: TTS ----------------------------
 def speak(text):
