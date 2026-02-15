@@ -64,6 +64,7 @@ def cleanup_motors():
     pwmB.stop()
     GPIO.cleanup()
 
+
 # SERVO functions
 def angle_to_duty_cycle(angle):
     """
@@ -146,8 +147,8 @@ def cleanup():
     right_ear.stop()
     GPIO.cleanup()
 
-set_servo_angle(left_ear, left_current_angle)
-set_servo_angle(right_ear, right_current_angle)
+#set_servo_angle(left_ear, left_current_angle)
+#set_servo_angle(right_ear, right_current_angle)
 
 # ==========================================
 # TEST BLOCK (Ignored during import)
