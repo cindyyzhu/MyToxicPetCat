@@ -92,7 +92,7 @@ def play_audio(audio_data, sr):
     # ensure float32 (PortAudio prefers this)
     audio_data = audio_data.astype(np.float32)
 
-    audio_data = audio_data / np.max(np.abs(audio_data))
+    #audio_data = audio_data / np.max(np.abs(audio_data))
 
 
     sd.play(audio_data, DEFAULT_SR)
