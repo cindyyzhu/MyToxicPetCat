@@ -6,7 +6,7 @@ import requests
 from io import BytesIO
 import random
 import glob
-from motors import motorA_forward, motorB_forward, stop_motors, cleanup_motors
+from motors_just_fcns import motorA_forward, motorB_forward, stop_motors, cleanup_motors
 
 # ---------------------------- CONFIG ----------------------------
 API_KEY = os.getenv("ELEVENLABS_API_KEY")
