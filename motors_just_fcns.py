@@ -64,19 +64,19 @@ def cleanup_motors():
     pwmB.stop()
     GPIO.cleanup()
 
-
+"""
 # SERVO functions
 def angle_to_duty_cycle(angle):
-    """
+    
     Convert angle (0-180) to duty cycle (2-12)
     Most servos: 2% = 0°, 7% = 90°, 12% = 180°
     Adjust these values if your servos behave differently
-    """
+    
     return 2 + (angle / 180) * 10
 
 
 def set_servo_angle(pwm, angle):
-    """Set servo to specific angle"""
+    Set servo to specific angle
     duty = angle_to_duty_cycle(angle)
     pwm.ChangeDutyCycle(duty)
     time.sleep(0.01)  # Small delay for servo to respond
@@ -84,7 +84,7 @@ def set_servo_angle(pwm, angle):
 
 
 def sweep_to_angle(pwm, target_angle, current_angle, speed=0.05):
-    """
+    
     Smoothly sweep servo from current position to target angle.
     
     Args:
@@ -95,7 +95,7 @@ def sweep_to_angle(pwm, target_angle, current_angle, speed=0.05):
     
     Returns:
         float: The final angle position
-    """
+    
     # Clamp target angle to valid range
     target_angle = max(0, min(180, target_angle))
     
@@ -119,30 +119,30 @@ def sweep_to_angle(pwm, target_angle, current_angle, speed=0.05):
 
 
 def sweep_left_ear(target_angle, speed=0.05):
-    """Sweep left ear to target angle"""
+ Sweep left ear to target angle
     global left_current_angle
     left_current_angle = sweep_to_angle(left_ear, target_angle, left_current_angle, speed)
 
 
 def sweep_right_ear(target_angle, speed=0.05):
-    """Sweep right ear to target angle"""
+    #Sweep right ear to target angle
     global right_current_angle
     right_current_angle = sweep_to_angle(right_ear, target_angle, right_current_angle, speed)
 
 
 def sweep_both_ears(target_angle, speed=0.05):
-    """Sweep both ears to the same target angle"""
+    Sweep both ears to the same target angle
     sweep_left_ear(target_angle, speed)
     sweep_right_ear(target_angle, speed)
 
 
 def reset_ears():
-    """Reset both ears to center position (90 degrees)"""
+    Reset both ears to center position (90 degrees)
     sweep_both_ears(90)
 
 
 def cleanup():
-    """Clean up GPIO on exit"""
+    Clean up GPIO on exit
     left_ear.stop()
     right_ear.stop()
     GPIO.cleanup()
@@ -150,6 +150,7 @@ def cleanup():
 #set_servo_angle(left_ear, left_current_angle)
 #set_servo_angle(right_ear, right_current_angle)
 
+"""
 # ==========================================
 # TEST BLOCK (Ignored during import)
 # ==========================================
