@@ -98,6 +98,17 @@ def play_audio(audio_data, sr):
     sd.play(audio_data, DEFAULT_SR)
     sd.wait()
 
+def play_audio_dont_wait(audio_data, sr):
+    audio_data = resample_audio(audio_data, sr, DEFAULT_SR)
+
+    # ensure float32 (PortAudio prefers this)
+    audio_data = audio_data.astype(np.float32)
+
+    audio_data = audio_data / np.max(np.abs(audio_data))
+
+
+    sd.play(audio_data, DEFAULT_SR)
+
 # ---------------------------- HELPER: TTS ----------------------------
 def get_speech_from_elevenlabs(text):
     url = f"https://api.elevenlabs.io/v1/text-to-speech/{VOICE_ID}"
@@ -158,7 +169,7 @@ def play_cat_sound_and_move_motor(data, sr):
     print("Starting to 'lip sync'")
     
     # 3. START AUDIO ONCE (It plays in the background)
-    sd.play(data, sr)
+    play_audio_dont_wait(data, sr)
     
     # 4. Loop through the pre-calculated motor speeds
     for amp in amplitudes:
@@ -170,7 +181,7 @@ def play_cat_sound_and_move_motor(data, sr):
         if amp > 0.1: 
             # DC motors need a minimum speed to overcome physical friction.
             # Let's map the amplitude to a speed between 40 and 100.
-            speed = int((amp * 200)) 
+            speed = int((amp * 100)) 
             
             # Move the motor! (Assuming Motor A controls the jaw)
             motorA_forward(speed=speed) 
