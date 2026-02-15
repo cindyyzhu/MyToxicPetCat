@@ -529,14 +529,14 @@
 
         const ws = new WebSocket('ws://localhost:8765');
 
-        // WebSocket connection (uncomment when ready to use)
-        /*
-        const ws = new WebSocket('ws://localhost:8765');
         ws.onmessage = (event) => {
             const data = JSON.parse(event.data);
             updateFromBackend(data);
         };
-        */
+
+        ws.onopen = () => console.log("✅ Connected to Python backend");
+        ws.onclose = () => console.log("❌ Backend disconnected");
+
 
         // TEST MODE: Auto-toggle between idle and responding every 5 seconds
         let testMode = true;
@@ -552,8 +552,8 @@
         }
 
         // Run test every 5 seconds
-        const testInterval = setInterval(toggleResponse, 5000);
-        console.log('⏱️  Test interval started (every 5 seconds)');
+        //const testInterval = setInterval(toggleResponse, 5000);
+        //console.log('⏱️  Test interval started (every 5 seconds)');
 
         // Toggle test mode on click of cat display
         document.querySelector('.cat-display').addEventListener('click', () => {
