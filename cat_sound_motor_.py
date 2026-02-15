@@ -177,8 +177,6 @@ def play_cat_sound_and_move_motor(data, sr):
         start_time = time.time()
         
         # 4. Loop through the pre-calculated motor speeds
-for i, amp in enumerate(amplitudes):
-    start_time = time.time()
 
     if amp > 0.1:
         speed = int(40 + amp * 60)   # 40–100 safe range
