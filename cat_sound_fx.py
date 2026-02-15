@@ -21,14 +21,29 @@ RECORD_SECONDS = 5
 CAT_SOUNDS_FOLDER = "cat_sounds"  # make sure this folder exists with meows/purrs etc.
 
 # ---------------------------- AUTO-SELECT AUDIO DEVICE ----------------------------
-for i, d in enumerate(sd.query_devices()):
-    if d["max_input_channels"] > 0 and d["max_output_channels"] > 0:
-        sd.default.device = (i, i)
-        print("Using audio device:", d["name"])
-        DEFAULT_SR = int(d['default_samplerate'])
-        break
-else:
-    raise RuntimeError("No suitable input/output device found")
+devices = sd.query_devices()
+
+input_dev = None
+output_dev = None
+
+for i, d in enumerate(devices):
+    if d["max_input_channels"] > 0 and input_dev is None:
+        input_dev = i
+    if "Headphones" in d["name"] and d["max_output_channels"] > 0:
+        output_dev = i
+
+# fallback if headphones not found
+if output_dev is None:
+    for i, d in enumerate(devices):
+        if d["max_output_channels"] > 0:
+            output_dev = i
+            break
+
+sd.default.device = (input_dev, output_dev)
+
+print("Input device:", devices[input_dev]["name"])
+print("Output device:", devices[output_dev]["name"])
+DEFAULT_SR = int(devices[output_dev]["default_samplerate"])
 
 def resample_audio(audio, orig_sr, target_sr):
     if orig_sr == target_sr:
