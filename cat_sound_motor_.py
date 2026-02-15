@@ -194,10 +194,8 @@ def play_cat_sound_and_move_motor(data, sr):
 
             elif amp > 0.5:
                 motorA_forward(speed=speed)
-                motorB_backward(speed=speed)
 
             elif amp > 0.3:
-                motorA_backward(speed=speed)
                 motorB_forward(speed=speed)
             
             elif amp >0.2:
