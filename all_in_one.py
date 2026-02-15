@@ -1,205 +1,216 @@
-#!/usr/bin/env python3
 import os
-import asyncio
-import json
-import time
-import random
-import glob
-from io import BytesIO
-from http.server import BaseHTTPRequestHandler, HTTPServer
-import threading
-
 import sounddevice as sd
 import soundfile as sf
 import numpy as np
 import requests
+from io import BytesIO
+import random
+import glob
+import time
+from motors_just_fcns import motorA_forward, motorB_forward, stop_motors, cleanup_motors
+
+import asyncio
 import websockets
+import json
+from threading import Thread
+from http.server import SimpleHTTPRequestHandler, HTTPServer
 
-from motors_just_fcns import (
-    motorA_forward,
-    motorB_forward,
-    stop_motors,
-    cleanup_motors
-)
-
-# ============================ CONFIG ============================
-
+# ---------------------------- CONFIG ----------------------------
 API_KEY = os.getenv("ELEVENLABS_API_KEY")
 if not API_KEY:
-    raise RuntimeError("Set ELEVENLABS_API_KEY")
+    raise ValueError("Set ELEVENLABS_API_KEY environment variable!")
 
-AGENT_ID = "agent_1601khf3r1jfff2saez29f6frfny"
-VOICE_ID = "XdflFrQO8wbGpWMNZHFr"
+AGENT_ID = "agent_1601khf3r1jfff2saez29f6frfny"  # your agent ID
+VOICE_ID = "XdflFrQO8wbGpWMNZHFr"                 # your TTS voice ID
 
 RECORD_SECONDS = 5
 CAT_SOUNDS_FOLDER = "cat_sounds"
-
-HTTP_PORT = 8000
 WS_PORT = 8765
+HTTP_PORT = 8000
 
 connected_clients = set()
 
-# ============================ AUDIO DEVICE ============================
+# ---------------------------- AUDIO DEVICE ----------------------------
+for i, d in enumerate(sd.query_devices()):
+    if d["max_input_channels"] > 0 and d["max_output_channels"] > 0:
+        sd.default.device = (i, i)
+        print("Using audio device:", d["name"])
+        DEFAULT_SR = int(d['default_samplerate'])
+        break
+else:
+    raise RuntimeError("No suitable input/output device found")
 
-sd.default.device = (2, 2)  # USB Audio Device (1 in, 2 out)
-DEFAULT_SR = int(sd.query_devices(2)["default_samplerate"])
+# ---------------------------- AUDIO HELPERS ----------------------------
+def resample_audio(audio, orig_sr, target_sr):
+    if orig_sr == target_sr:
+        return audio.astype(np.float32)
+    duration = len(audio) / orig_sr
+    new_length = int(duration * target_sr)
+    if audio.ndim == 1:
+        resampled = np.interp(np.linspace(0, len(audio)-1, new_length), np.arange(len(audio)), audio)
+    else:
+        channels = [np.interp(np.linspace(0, len(audio)-1, new_length), np.arange(len(audio)), audio[:, ch])
+                    for ch in range(audio.shape[1])]
+        resampled = np.stack(channels, axis=1)
+    return resampled.astype(np.float32)
 
-# ============================ HTML ============================
-
-HTML_PAGE = r"""
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<title>My Toxic Pet Cat</title>
-<style>
-body { background:#120820; color:#eee; font-family: monospace; }
-#speech { border:2px solid #0ff; padding:20px; height:150px; }
-</style>
-</head>
-<body>
-<h1>😾 My Toxic Pet Cat</h1>
-<div id="speech"></div>
-<p id="mood">Mood: idle</p>
-
-<script>
-const ws = new WebSocket("ws://localhost:8765");
-
-ws.onmessage = e => {
-  const d = JSON.parse(e.data);
-  if (d.mood) document.getElementById("mood").innerText = "Mood: " + d.mood;
-  if (d.clear_response) document.getElementById("speech").innerText = "";
-  if (d.response) {
-    let i = 0;
-    document.getElementById("speech").innerText = "";
-    const t = setInterval(() => {
-      document.getElementById("speech").innerText += d.response[i++];
-      if (i >= d.response.length) clearInterval(t);
-    }, d.typing_speed || 40);
-  }
-};
-</script>
-</body>
-</html>
-"""
-
-# ============================ HTTP SERVER ============================
-
-class FrontendHandler(BaseHTTPRequestHandler):
-    def do_GET(self):
-        self.send_response(200)
-        self.send_header("Content-Type", "text/html")
-        self.end_headers()
-        self.wfile.write(HTML_PAGE.encode())
-
-def start_http():
-    server = HTTPServer(("0.0.0.0", HTTP_PORT), FrontendHandler)
-    print(f"🌐 UI → http://localhost:{HTTP_PORT}")
-    server.serve_forever()
-
-# ============================ WEBSOCKET ============================
-
-async def ws_handler(ws):
-    connected_clients.add(ws)
-    try:
-        await ws.wait_closed()
-    finally:
-        connected_clients.remove(ws)
-
-async def ui(data):
-    if connected_clients:
-        msg = json.dumps(data)
-        await asyncio.gather(*(c.send(msg) for c in connected_clients))
-
-# ============================ AUDIO HELPERS ============================
-
-def record_audio():
-    audio = sd.rec(int(RECORD_SECONDS * DEFAULT_SR),
-                   samplerate=DEFAULT_SR,
-                   channels=1,
-                   dtype="float32")
+def record_audio(seconds, samplerate):
+    print(f"Recording for {seconds} seconds at {samplerate} Hz...")
+    audio = sd.rec(int(seconds * samplerate), samplerate=samplerate, channels=1, dtype="float32")
     sd.wait()
     return audio.flatten()
 
-def stt(audio):
-    sf.write("tmp.wav", audio, DEFAULT_SR)
-    r = requests.post(
-        "https://api.elevenlabs.io/v1/speech-to-text",
-        headers={"xi-api-key": API_KEY},
-        files={"file": open("tmp.wav","rb")},
-        data={"model_id":"scribe_v2"}
-    )
-    return r.json().get("text","") if r.ok else ""
+def speech_to_text(audio_np, samplerate):
+    wav_file = "temp.wav"
+    sf.write(wav_file, audio_np, samplerate)
+    url = "https://api.elevenlabs.io/v1/speech-to-text"
+    headers = {"xi-api-key": API_KEY}
+    files = {"file": ("temp.wav", open(wav_file, "rb"), "audio/wav")}
+    data = {"model_id": "scribe_v2"}
+    r = requests.post(url, headers=headers, files=files, data=data)
+    if r.status_code != 200:
+        print("STT failed:", r.text)
+        return ""
+    return r.json().get("text", "")
 
-def tts(text):
-    r = requests.post(
-        f"https://api.elevenlabs.io/v1/text-to-speech/{VOICE_ID}",
-        headers={"xi-api-key":API_KEY,"Content-Type":"application/json"},
-        json={"text":text,"model_id":"eleven_monolingual_v1"}
-    )
-    return sf.read(BytesIO(r.content), dtype="float32")
-
-def play_and_move(data, sr):
-    sd.play(data, sr, blocking=False)
-    amps = np.abs(data.mean(axis=1) if data.ndim > 1 else data)
-    amps /= np.max(amps)
-
-    for a in amps[::sr//30]:
-        if a > 0.1:
-            speed = int(40 + a * 60)
-            motorA_forward(speed)
-            motorB_forward(speed)
-        else:
-            stop_motors()
-        time.sleep(1/30)
-
-    stop_motors()
+def play_audio(audio_data, sr):
+    audio_data = resample_audio(audio_data, sr, DEFAULT_SR)
+    audio_data = audio_data.astype(np.float32)
+    audio_data = audio_data / np.max(np.abs(audio_data))
+    sd.play(audio_data, DEFAULT_SR)
     sd.wait()
 
-# ============================ AGENT ============================
+def play_audio_dont_wait(audio_data, sr):
+    audio_data = resample_audio(audio_data, sr, DEFAULT_SR)
+    audio_data = audio_data.astype(np.float32)
+    audio_data = audio_data / np.max(np.abs(audio_data))
+    sd.play(audio_data, DEFAULT_SR)
 
-def agent_reply(text):
-    r = requests.post(
-        f"https://api.elevenlabs.io/v1/convai/agents/{AGENT_ID}/simulate-conversation",
-        headers={"xi-api-key":API_KEY,"Content-Type":"application/json"},
-        json={
-            "simulation_specification":{
-                "simulated_user_config":{"first_message":text},
-                "agent_config":{"llm_override":"toxic cat"}
-            },
-            "new_turns_limit":1
-        }
-    )
-    for t in r.json().get("simulated_conversation",[]):
-        if t["role"]=="agent":
-            return t["message"]
+def get_speech_from_elevenlabs(text):
+    url = f"https://api.elevenlabs.io/v1/text-to-speech/{VOICE_ID}"
+    headers = {"xi-api-key": API_KEY, "Content-Type": "application/json"}
+    payload = {"text": text, "model_id": "eleven_monolingual_v1"}
+    r = requests.post(url, headers=headers, json=payload)
+    if r.status_code != 200:
+        print("TTS failed:", r.text)
+        return None, None
+    data, sr = sf.read(BytesIO(r.content), dtype="float32")
+    return data, sr
+
+def get_amplitude_envelope(data, sr, fps=30):
+    chunk_size = sr // fps
+    if len(data.shape) > 1:
+        data = np.mean(data, axis=1)
+    num_chunks = len(data) // chunk_size
+    truncated_data = data[:num_chunks * chunk_size]
+    chunks = truncated_data.reshape(num_chunks, chunk_size)
+    rms_values = np.sqrt(np.mean(chunks**2, axis=1))
+    max_rms = np.max(rms_values)
+    return rms_values / max_rms if max_rms > 0 else rms_values
+
+def play_cat_sound():
+    cat_files = glob.glob(os.path.join(CAT_SOUNDS_FOLDER, "*.wav"))
+    if not cat_files:
+        return
+    cat_file = random.choice(cat_files)
+    data, sr = sf.read(cat_file, dtype="float32")
+    play_audio(data, sr)
+
+def play_cat_sound_and_move_motor(data, sr):
+    play_cat_sound()
+    amplitudes = get_amplitude_envelope(data, sr, fps=30)
+    delay_between_frames = 1.0 / 30
+    play_audio_dont_wait(data, sr)
+    for amp in amplitudes:
+        start_time = time.time()
+        if amp > 0.1:
+            speed = int(amp * 100)
+            motorA_forward(speed=speed)
+            motorB_forward(speed=speed)
+        else:
+            stop_motors()
+        elapsed = time.time() - start_time
+        time.sleep(max(0, delay_between_frames - elapsed))
+    stop_motors()
+    sd.wait()
+    play_cat_sound()
+
+def agent_reply(user_text):
+    url = f"https://api.elevenlabs.io/v1/convai/agents/{AGENT_ID}/simulate-conversation"
+    headers = {"xi-api-key": API_KEY, "Content-Type": "application/json"}
+    payload = {
+        "simulation_specification": {
+            "simulated_user_config": {"first_message": user_text, "language": "en"},
+            "agent_config": {"persona": "You are a toxic cat assistant...", "llm_override": "Respond in toxic cat style"}
+        },
+        "new_turns_limit": 1
+    }
+    r = requests.post(url, headers=headers, json=payload)
+    if r.status_code != 200:
+        print("Agent call failed:", r.text)
+        return ""
+    turns = r.json().get("simulated_conversation", [])
+    for turn in turns:
+        if turn.get("role") == "agent":
+            return turn.get("message", "").replace("[sarcastic]", "").strip()
     return ""
 
-# ============================ MAIN LOOP ============================
+# ---------------------------- WEBSOCKET ----------------------------
+async def ws_handler(websocket):
+    connected_clients.add(websocket)
+    try:
+        await websocket.wait_closed()
+    finally:
+        connected_clients.remove(websocket)
 
+async def send_ui_update(data):
+    if connected_clients:
+        msg = json.dumps(data)
+        await asyncio.gather(*(ws.send(msg) for ws in connected_clients))
+
+# ---------------------------- VOICE LOOP ----------------------------
 async def voice_loop():
-    print("🎙️ Press Enter to talk")
-    while True:
-        input()
-        await ui({"mood":"responding","clear_response":True})
+    print("\nVoice agent ready! Speak into your mic.\n")
+    try:
+        while True:
+            input("Press Enter to record your message...")
+            await send_ui_update({"mood": "responding", "clear_response": True})
+            audio_np = record_audio(RECORD_SECONDS, DEFAULT_SR)
+            user_text = speech_to_text(audio_np, DEFAULT_SR)
+            if not user_text:
+                continue
+            reply_text = agent_reply(user_text)
+            if not reply_text:
+                continue
+            await send_ui_update({"response": reply_text, "typing": True, "typing_speed": 40})
+            data, sr = get_speech_from_elevenlabs(reply_text)
+            if data is not None:
+                play_cat_sound_and_move_motor(data, sr)
+            await send_ui_update({"mood": "idle"})
+    except KeyboardInterrupt:
+        cleanup_motors()
 
-        audio = record_audio()
-        text = stt(audio)
-        if not text:
-            await ui({"mood":"idle"})
-            continue
+# ---------------------------- HTTP SERVER ----------------------------
+def start_http_server():
+    server = HTTPServer(("0.0.0.0", HTTP_PORT), SimpleHTTPRequestHandler)
+    print(f"🌐 UI → http://localhost:{HTTP_PORT}")
+    server.serve_forever()
 
-        reply = agent_reply(text)
-        await ui({"response":reply,"typing":True,"typing_speed":35})
+# ---------------------------- MAIN ----------------------------
+async def main():
+    # Run HTTP server in separate thread
+    Thread(target=start_http_server, daemon=True).start()
 
-        data, sr = tts(reply)
-        play_and_move(data, sr)
+    # Start WebSocket server
+    await websockets.serve(ws_handler, "0.0.0.0", WS_PORT)
+    print(f"🌐 WebSocket server running on ws://localhost:{WS_PORT}")
 
-        await ui({"mood":"idle"})
-
-# ============================ START ============================
+    # Start voice loop
+    await voice_loop()
 
 if __name__ == "__main__":
-    threading.Thread(target=start_http, daemon=True).start()
-    asyncio.run(websockets.serve(ws_handler, "0.0.0.0", WS_PORT))
-    asyncio.run(voice_loop())
+    try:
+        asyncio.run(main())
+    except KeyboardInterrupt:
+        print("\n🛑 Exiting and cleaning up motors...")
+        cleanup_motors()
